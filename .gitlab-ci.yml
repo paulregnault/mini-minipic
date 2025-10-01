@@ -8,8 +8,6 @@
 variables:
   # List of GPUs to exclude from the tests
   EXCLUDED_GPUS: ""
-  # List of benchmarks to run
-  BENCHMARKS: "default,beam,antenna"
 
 .default_run: &default_run [main, develop, pipeline]
 
@@ -72,7 +70,7 @@ test_kokkos_omp:
   script:
     - cp -r tests tests_kokkos_omp
     - cd tests_kokkos_omp
-    - srun --time=00:20:00 --cpus-per-task=8 --ntasks=1 --partition=cpu_short python3 run.py -c icpx -g kokkos --benchmarks=$BENCHMARKS # --save-timers
+    - srun --time=00:20:00 --cpus-per-task=8 --ntasks=1 --partition=cpu_short python3 run.py -c icpx -g kokkos  # --save-timers
 
 # _____________________________________________________________________________
 #
@@ -90,7 +88,7 @@ test_kokkos_gpu:
   script:
     - cp -r tests tests_kokkos_gpu
     - cd tests_kokkos_gpu
-    - srun --nodes=1 --time=00:15:00 -p gpua100 --gres=gpu:1 --exclude=$EXCLUDED_GPUS python3 run.py -c g++ -g kokkos_gpu --benchmarks=$BENCHMARKS  # --save-timers
+    - srun --nodes=1 --time=00:15:00 -p gpua100 --gres=gpu:1 --exclude=$EXCLUDED_GPUS python3 run.py -c g++ -g kokkos_gpu  # --save-timers
   
 
 
