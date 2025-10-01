@@ -48,7 +48,7 @@ configuration_list = {
                  'args' : [ '', '', '', '-it 10000', '-it 10000'],
                  'exe_name' : 'minipic.kokkos',
                  'threads' : [8, 8, 8, 1, 1],
-                 'benchmarks' : [ "default_gpu", "beam_gpu", "antenna", "Ecst", "Bcst" ]},
+                 'benchmarks' : [ "default_gpu", "beam_gpu", "antenna" ]},
 
     'kokkos_gpu' : { 'compiler' : 'g++',
                  'cmake' : '-DCMAKE_VERBOSE_MAKEFILE=ON -DBACKEND="kokkos" -DDEVICE="nvidia_a100" -DCMAKE_BUILD_TYPE=Release',

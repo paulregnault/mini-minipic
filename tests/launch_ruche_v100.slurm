@@ -20,6 +20,7 @@ export PYTHONPATH=${PWD}:$PYTHONPATH
 # Kokkos
 
 source $WORKDIR/gitlab-ci_runs/env/kokkos_v100
+
 python run.py -g kokkos_gpu
 #python run.py -g kokkos_unified_gpu
 #python run.py -g kokkos_dualview_unified_gpu
