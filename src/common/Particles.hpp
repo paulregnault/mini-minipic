@@ -257,33 +257,6 @@ public:
   //
   //! \brief Copy particle at index ip in object `particles` at index i of this
   //! \param[in] i index where to put the particles
-  // __________________________________________________________________________
-  // void set(int i, Particles &particles, int ip) {
-
-  //   x_h(i) = particles.x_h(ip);
-  //   y_h(i) = particles.y_h(ip);
-  //   z_h(i) = particles.z_h(ip);
-
-  //   mx_h(i) = particles.mx_h(ip);
-  //   my_h(i) = particles.my_h(ip);
-  //   mz_h(i) = particles.mz_h(ip);
-  //   w_h(i)  = particles.w_h(ip);
-
-  //   if (with_electromagnetic_fields_ && particles.with_electromagnetic_fields_) {
-  //     Ex_h(i) = particles.Ex_h(ip);
-  //     Ey_h(i) = particles.Ey_h(ip);
-  //     Ez_h(i) = particles.Ez_h(ip);
-
-  //     Bx_h(i) = particles.Bx_h(ip);
-  //     By_h(i) = particles.By_h(ip);
-  //     Bz_h(i) = particles.Bz_h(ip);
-  //   }
-  // }
-
-  // __________________________________________________________________________
-  //
-  //! \brief Copy particle at index ip in object `particles` at index i of this
-  //! \param[in] i index where to put the particles
   //! \param[in] w weight of the particle to add
   //! \param[in] x position of the particle to add
   //! \param[in] y position of the particle to add
@@ -325,16 +298,12 @@ public:
 
     T kinetic_energy = 0;
 
-#ifdef __MINIPIC_KOKKOS_COMMON__
-
     if constexpr (std::is_same<T_space, minipic::Device>::value) {
-
-#if defined(__MINIPIC_KOKKOS_COMMON__)
+      
       device_vector_t w  = weight_.data_;
       device_vector_t mx = mx_.data_;
       device_vector_t my = my_.data_;
       device_vector_t mz = mz_.data_;
-#endif
 
       Kokkos::parallel_reduce(
         "kinetic_energy_on_device",
@@ -351,12 +320,6 @@ public:
 
       kinetic_energy = get_kinetic_energy_on_host();
     }
-
-#else
-
-    kinetic_energy = get_kinetic_energy_on_host();
-
-#endif
 
     return kinetic_energy * mass_m;
   }

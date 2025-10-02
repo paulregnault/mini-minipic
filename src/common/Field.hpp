@@ -48,10 +48,6 @@ public:
 
   Kokkos::View<T ***, Kokkos::SharedSpace> data_m;
 
-#else
-
-  std::shared_ptr<std::vector<T>> data_m;
-
 #endif
 
   // _________________________________________________________________________________________
@@ -61,14 +57,7 @@ public:
   //! \brief Default constructor - create an empty field
   // _________________________________________________________________________________________
   Field() : name_m("empty"), nx_m(0), ny_m(0), nz_m(0), dual_x_m(0), dual_y_m(0), dual_z_m(0) {
-
     nynz_ = 0;
-
-#if defined(__MINIPIC_KOKKOS_COMMON__)
-    // nothing to do
-#else
-    data_m = nullptr;
-#endif
   }
 
   // _________________________________________________________________________________________
@@ -151,9 +140,6 @@ public:
     return data_m_h(i, j, k);
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
     return data_m(i, j, k);
-#else
-    // return data_m->operator[](i * (nz_m * ny_m) + j * (nz_m) + k);
-    return (*data_m)[i * (nz_m * ny_m) + j * (nz_m) + k];
 #endif
   }
 
@@ -163,12 +149,6 @@ public:
   //! \param idx index in the 1d array
   //! \return the value of the field at the given index
   // _________________________________________________________________________________________
-#if defined(__MINIPIC_KOKKOS_COMMON__)
-  // no relevant since we do not assume a specific layout
-  // Should be computed using the layout properties : stride, etc...
-#else
-  inline __attribute__((always_inline)) T &operator[](const int idx) { return data_m[idx]; }
-#endif
 
   //! \brief return the number of grid points in the x direction
   //! \return return the number of grid points in the x direction
@@ -228,10 +208,6 @@ public:
     data_m_h = create_mirror_view(data_m);
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
     data_m = Kokkos::View<T ***, Kokkos::SharedSpace>(name, nx, ny, nz);
-#else
-    // data_m = new std::vector<T>(nx * ny * nz, v);
-    data_m = std::make_shared<std::vector<T>>(nx * ny * nz, v);
-    // resize(nx, ny, nz, v);
 #endif
 
     fill(v, minipic::host);
@@ -254,8 +230,6 @@ public:
     nynz_ = ny * nz;
 #if defined(__MINIPIC_KOKKOS_COMMON__)
     data_m.resize(nx, ny, nz);
-#else
-    data_m->resize(nx * ny * nz, v);
 #endif
   }
 
@@ -276,25 +250,6 @@ public:
     // ---> Host case
     if constexpr (std::is_same<T_space, minipic::Host>::value) {
 #if defined(__MINIPIC_KOKKOS_NON_UNIFIED__)
-      // Kokkos::Experimental::fill(Kokkos::DefaultHostExecutionSpace(), data_m.h_view, 0.);
-
-       //for (auto ix = 0; ix < nx_m; ++ix) {
-       //  for (auto iy = 0; iy < ny_m; ++iy) {
-       //    for (auto iz = 0; iz < nz_m; ++iz) {
-       //      data_m_h(ix, iy, iz) = v;
-       //    }
-       //  }
-       //}
-
-      //typedef Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<3>>
-      //  mdrange_policy;
-
-      //auto& data_ref = data_m_h;
-      //Kokkos::parallel_for(
-      //  mdrange_policy({0, 0, 0}, {nx_m, ny_m, nz_m}),
-      //  KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-      //    data_ref(ix, iy, iz) = v;
-      //  });
 
       Kokkos::deep_copy(data_m_h, v);
 
@@ -311,14 +266,10 @@ public:
         KOKKOS_LAMBDA(const int ix, const int iy, const int iz) { data_ref(ix, iy, iz) = v; });
 
       Kokkos::fence();
-#else
-      std::fill(data_m->begin(), data_m->end(), v);
 #endif
 
       // ---> Device case
     } else if constexpr (std::is_same<T_space, minipic::Device>::value) {
-#if defined(__MINIPIC_KOKKOS_COMMON__)
-
       typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>> mdrange_policy;
       auto& data_ref = data_m;
       Kokkos::parallel_for(
@@ -326,9 +277,6 @@ public:
         KOKKOS_LAMBDA(const int ix, const int iy, const int iz) { data_ref(ix, iy, iz) = v; });
 
       Kokkos::fence();
-#else
-      std::fill(data_m->begin(), data_m->end(), v);
-#endif
     }
   }
 
@@ -361,18 +309,6 @@ public:
     }
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
     return data_m.data();
-#elif defined(__MINIPIC_THRUST__)
-    if constexpr (std::is_same<T_space, minipic::Host>::value) {
-      return thrust::raw_pointer_cast(host_data_.data());
-    } else if constexpr (std::is_same<T_space, minipic::Device>::value) {
-      return thrust::raw_pointer_cast(device_data_.data());
-    } else {
-      return thrust::raw_pointer_cast(host_data_.data());
-    }
-    // required by nvhpc to avaid a warning
-    return thrust::raw_pointer_cast(host_data_.data());
-#else
-    return data_m->data();
 #endif
   }
 
@@ -412,16 +348,10 @@ public:
           local_sum += Kokkos::pow(data_ref(ix, iy, iz), power);
         },
         sum);
-#else
-      for (int i = 0; i < size(); i++) {
-        sum += pow((*data_m)[i], power);
-      }
 #endif
 
       // ---> Device case
     } else if constexpr (std::is_same<T_space, minipic::Device>::value) {
-#if defined(__MINIPIC_KOKKOS_COMMON__)
-
       auto& data_ref = data_m;
       typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>> mdrange_policy;
       Kokkos::parallel_reduce(
@@ -433,12 +363,6 @@ public:
         sum);
 
       Kokkos::fence();
-
-#else
-      for (int i = 0; i < size(); i++) {
-        sum += pow((*data_m)[i], power);
-      }
-#endif
     }
 
     return sum;
@@ -521,11 +445,6 @@ using field_t        = decltype(create_mirror_view(device_field_t{}));
 
 using device_field_t = Kokkos::View<mini_float ***, Kokkos::SharedSpace>;
 using field_t        = Kokkos::View<mini_float ***, Kokkos::SharedSpace>;
-
-#else
-
-using device_field_t = std::vector<mini_float>;
-using grid_t         = std::vector<mini_float>;
 
 #endif
 
