@@ -25,7 +25,7 @@ public:
   // Main data
 #if defined(__MINIPIC_KOKKOS_NON_UNIFIED__)
   Kokkos::View<T *> data_;
-  typename Kokkos::View<T *>::HostMirror data_h_;
+  typename decltype(data_)::host_mirror_type data_h_;
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
   Kokkos::View<T *, Kokkos::SharedSpace> data_;
 #endif
@@ -296,7 +296,7 @@ public:
     } else if constexpr (std::is_same<T_space, minipic::Device>::value) {
 
 #if defined(__MINIPIC_KOKKOS__)
-      typename Kokkos::View<T *, Kokkos::DefaultExecutionSpace::memory_space> view = data_;
+      typename Kokkos::View<T *> view = data_;
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
       typename Kokkos::View<T *, Kokkos::SharedSpace> view = data_;
 #endif
@@ -355,7 +355,7 @@ public:
 #if defined(__MINIPIC_KOKKOS__)
 
 using vector_t        = Kokkos::View<mini_float *, Kokkos::DefaultHostExecutionSpace::memory_space>;
-using device_vector_t = Kokkos::View<mini_float *, Kokkos::DefaultExecutionSpace::memory_space>;
+using device_vector_t = Kokkos::View<mini_float *>;
 
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
 
