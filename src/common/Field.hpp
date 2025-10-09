@@ -40,8 +40,8 @@ public:
 
 #if defined(__MINIPIC_KOKKOS__)
 
-  Kokkos::View<T ***, Kokkos::DefaultExecutionSpace::memory_space> data_m;
-  decltype(create_mirror_view(data_m)) data_m_h;
+  Kokkos::View<T ***> data_m;
+  typename Kokkos::View<T ***>::HostMirror data_m_h;
 
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
 
@@ -200,7 +200,7 @@ public:
     }
 
 #if defined(__MINIPIC_KOKKOS__)
-    data_m = Kokkos::View<T ***, Kokkos::DefaultExecutionSpace::memory_space>(name, nx, ny, nz);
+    data_m = Kokkos::View<T ***>(name, nx, ny, nz);
     data_m_h = create_mirror_view(data_m);
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
     data_m = Kokkos::View<T ***, Kokkos::SharedSpace>(name, nx, ny, nz);

@@ -24,8 +24,8 @@ public:
 
   // Main data
 #if defined(__MINIPIC_KOKKOS_NON_UNIFIED__)
-  Kokkos::View<T *, Kokkos::DefaultExecutionSpace::memory_space> data_;
-  decltype(Kokkos::create_mirror_view(data_)) data_h_;
+  Kokkos::View<T *> data_;
+  typename Kokkos::View<T *>::HostMirror data_h_;
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
   Kokkos::View<T *, Kokkos::SharedSpace> data_;
 #endif
@@ -64,7 +64,7 @@ public:
   void allocate(std::string name, unsigned int size) {
     size_ = size;
 #if defined(__MINIPIC_KOKKOS_NON_UNIFIED__)
-    data_ = Kokkos::View<T *, Kokkos::DefaultExecutionSpace::memory_space>(name, size);
+    data_ = Kokkos::View<T *>(name, size);
     data_h_ = Kokkos::create_mirror_view(data_);
 #elif defined(__MINIPIC_KOKKOS_UNIFIED__)
     data_ = Kokkos::View<T *, Kokkos::SharedSpace>(name, size);
