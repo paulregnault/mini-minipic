@@ -25,7 +25,11 @@ namespace Diags {
 void initialize(Params &params) {
   // Create the output directory
   std::string command = "mkdir -p " + params.output_directory;
-  system(command.c_str());
+  int error_code = system(command.c_str());
+  if (error_code != 0) {
+    ERROR(" Error while creating the directory :" << params.output_directory)
+    std::raise(SIGABRT);
+  }
 }
 
 // _____________________________________________________________________
@@ -221,7 +225,7 @@ void particle_binning(std::string diag_name,
   }
 
   // Use a code for the projected parameter
-  int data_code;
+  int data_code = -1;
   if (projected_parameter == "weight") {
     data_code = 0;
   } else if (projected_parameter == "density") {
