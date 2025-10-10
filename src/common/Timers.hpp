@@ -85,7 +85,6 @@ public:
     file << "{\n";
     file << "  \"parameters\" : {\n";
     file << "    \"number_of_patches\" : " << N_patches << ",\n";
-    file << "    \"number_of_threads\" : " << params.number_of_threads << ",\n";
     file << "    \"iterations\" : " << params.n_it << ",\n";
     file << "    \"save_timers_period\" : " << params.save_timers_period << ",\n";
     file << "    \"save_timers_start\" : " << params.save_timers_start << "\n";
@@ -242,8 +241,7 @@ public:
   //! \details The file is named "timers.json" and has the following format :
   //! {
   //!   "parameters" : {
-  //!       "number_of_patches" : N_patches,
-  //!       "number_of_threads" : number_of_threads
+  //!       "number_of_patches" : N_patches
   //!   },
   //!   "initilization" : [global],
   //!   "0" : {
