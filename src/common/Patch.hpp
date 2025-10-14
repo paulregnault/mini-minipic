@@ -173,15 +173,15 @@ public:
       for (unsigned int ip = 0; ip < n_particles; ip++) {
 
         if ((particles_m[is].x_.h(ip) < inf_m[0]) || (particles_m[is].x_.h(ip) >= sup_m[0]) or
-            (particles_m[is].y_h(ip) < inf_m[1]) or (particles_m[is].y_h(ip) >= sup_m[1]) or
-            (particles_m[is].z_h(ip) < inf_m[2]) or (particles_m[is].z_h(ip) >= sup_m[2])) {
+            (particles_m[is].y_.h(ip) < inf_m[1]) or (particles_m[is].y_.h(ip) >= sup_m[1]) or
+            (particles_m[is].z_.h(ip) < inf_m[2]) or (particles_m[is].z_.h(ip) >= sup_m[2])) {
           std::cerr << "Problem:" << std::endl;
           std::cerr << "Patch: " << i_patch_topology_m << " " << j_patch_topology_m << " "
                     << k_patch_topology_m << " xmin: " << inf_m[0] << " xmax: " << sup_m[0]
                     << std::endl;
           std::cerr << " Species: " << is << " Particles " << ip << "/" << n_particles
-                    << " - x: " << particles_m[is].x_.h(ip) << " y: " << particles_m[is].y_h(ip)
-                    << " z: " << particles_m[is].z_h(ip) << std::endl;
+                    << " - x: " << particles_m[is].x_.h(ip) << " y: " << particles_m[is].y_.h(ip)
+                    << " z: " << particles_m[is].z_.h(ip) << std::endl;
           std::raise(SIGABRT);
         }
       }

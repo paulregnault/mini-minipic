@@ -73,33 +73,9 @@ public:
   // ________________________________________________________
   // Host data accessors
 
-  //! \brief y accessor
-  //! \param[in] ip particle index
-  INLINE T &y_h(unsigned int ip) { return y_.h(ip); }
-
-  //! \brief z accessor
-  //! \param[in] ip particle index
-  INLINE T &z_h(unsigned int ip) { return z_.h(ip); }
-
-  //! \brief mx accessor
-  //! \param[in] ip particle index
-  INLINE T &mx_h(unsigned int ip) { return mx_.h(ip); }
-
-  //! \brief my accessor
-  //! \param[in] ip particle index
-  INLINE T &my_h(unsigned int ip) { return my_.h(ip); }
-
-  //! \brief mz accessor
-  //! \param[in] ip particle index
-  INLINE T &mz_h(unsigned int ip) { return mz_.h(ip); }
-
   //! \brief w accessor
   //! \param[in] ip particle index
   INLINE T &w_h(unsigned int ip) { return weight_.h(ip); }
-
-  //! \brief gamma_inv accessor
-  //! \param[in] ip particle index
-  // INLINE T &gamma_inv_h(unsigned int ip) { return gamma_inv_.h(ip); }
 
   //! \brief Ex accessor
   //! \param[in] ip particle index
@@ -352,8 +328,8 @@ public:
   // __________________________________________________________________________
   void print() {
     for (int ip = 0; ip < n_particles_m; ++ip) {
-      std::cerr << "" << ip << " - " << x_.h(ip) << " " << y_h(ip) << " " << z_h(ip)
-                << " mx: " << mx_h(ip) << " my: " << my_h(ip) << " mz: " << mz_h(ip) << std::endl;
+      std::cerr << "" << ip << " - " << x_.h(ip) << " " << y_.h(ip) << " " << z_.h(ip)
+                << " mx: " << mx_.h(ip) << " my: " << my_.h(ip) << " mz: " << mz_.h(ip) << std::endl;
     }
   }
 
@@ -371,7 +347,7 @@ public:
         std::cerr << " x: " << x_.h(ip) << " [" << xmin << " " << xmax << "]" << std::endl;
         std::cerr << " y: " << y_.h(ip) << " [" << ymin << " " << ymax << "]" << std::endl;
         std::cerr << " z: " << z_.h(ip) << " [" << zmin << " " << zmax << "]" << std::endl;
-        std::cerr << " mx: " << mx_h(ip) << " my: " << my_h(ip) << " mz: " << mz_h(ip) << std::endl;
+        std::cerr << " mx: " << mx_.h(ip) << " my: " << my_.h(ip) << " mz: " << mz_.h(ip) << std::endl;
       }
     }
   }
@@ -403,12 +379,12 @@ public:
     for (int ip = 0; ip < n_particles_m; ++ip) {
 
       x_sum += std::abs(x_.h(ip));
-      y_sum += std::abs(y_h(ip));
-      z_sum += std::abs(z_h(ip));
+      y_sum += std::abs(y_.h(ip));
+      z_sum += std::abs(z_.h(ip));
 
-      mx_sum += std::abs(mx_h(ip));
-      my_sum += std::abs(my_h(ip));
-      mz_sum += std::abs(mz_h(ip));
+      mx_sum += std::abs(mx_.h(ip));
+      my_sum += std::abs(my_.h(ip));
+      mz_sum += std::abs(mz_.h(ip));
 
       // gamma_inv_sum += std::abs(gamma_inv_h(ip));
 
@@ -439,7 +415,7 @@ private:
     T kinetic_energy = 0;
 
     for (size_t ip = 0; ip < size(); ++ip) {
-      const T gamma = sqrt(1. + mx_h(ip) * mx_h(ip) + my_h(ip) * my_h(ip) + mz_h(ip) * mz_h(ip));
+      const T gamma = sqrt(1. + mx_.h(ip) * mx_.h(ip) + my_.h(ip) * my_.h(ip) + mz_.h(ip) * mz_.h(ip));
       kinetic_energy += w_h(ip) * (gamma - 1.);
     }
 
