@@ -17,7 +17,7 @@ namespace operators {
 //! \param[in] em  global electromagnetic fields
 //! \param[in] patch  patch data structure
 // ______________________________________________________________________________
-auto interpolate(ElectroMagn &em, Patch &patch) -> void {
+auto interpolate(ElectroMagn &em, std::vector<Particles<mini_float>> &particles) -> void {
 
   const auto inv_dx_m = em.inv_dx_m;
   const auto inv_dy_m = em.inv_dy_m;
@@ -25,9 +25,9 @@ auto interpolate(ElectroMagn &em, Patch &patch) -> void {
 
   // em.Ex_m.print();
 
-  for (int is = 0; is < patch.n_species_m; is++) {
+  for (size_t is = 0; is < particles.size(); is++) {
 
-    const int n_particles = patch.particles_m[is].size();
+    const int n_particles = particles[is].size();
 
     device_field_t Ex = em.Ex_m.data_m;
     device_field_t Ey = em.Ey_m.data_m;
@@ -37,17 +37,17 @@ auto interpolate(ElectroMagn &em, Patch &patch) -> void {
     device_field_t By = em.By_m.data_m;
     device_field_t Bz = em.Bz_m.data_m;
 
-    device_vector_t x = patch.particles_m[is].x_.data_;
-    device_vector_t y = patch.particles_m[is].y_.data_;
-    device_vector_t z = patch.particles_m[is].z_.data_;
+    device_vector_t x = particles[is].x_.data_;
+    device_vector_t y = particles[is].y_.data_;
+    device_vector_t z = particles[is].z_.data_;
 
-    device_vector_t Exp = patch.particles_m[is].Ex_.data_;
-    device_vector_t Eyp = patch.particles_m[is].Ey_.data_;
-    device_vector_t Ezp = patch.particles_m[is].Ez_.data_;
+    device_vector_t Exp = particles[is].Ex_.data_;
+    device_vector_t Eyp = particles[is].Ey_.data_;
+    device_vector_t Ezp = particles[is].Ez_.data_;
 
-    device_vector_t Bxp = patch.particles_m[is].Bx_.data_;
-    device_vector_t Byp = patch.particles_m[is].By_.data_;
-    device_vector_t Bzp = patch.particles_m[is].Bz_.data_;
+    device_vector_t Bxp = particles[is].Bx_.data_;
+    device_vector_t Byp = particles[is].By_.data_;
+    device_vector_t Bzp = particles[is].Bz_.data_;
 
     Kokkos::parallel_for(
       n_particles,
@@ -73,20 +73,6 @@ auto interpolate(ElectroMagn &em, Patch &patch) -> void {
 
         double coeffs[3] = {ixn + 0.5, iyn, izn};
 
-        // interpolation electric field
-        // Ex (d, p , p)
-        // {
-        //   const double coeffs[3] = {ixn + 0.5, iyn, izn};
-        //   Exp(part)              = compute_interpolation(coeffs,
-        //                                     Ex(ixd, iyp, izp),
-        //                                     Ex(ixd, iyp, izp + 1),
-        //                                     Ex(ixd, iyp + 1, izp),
-        //                                     Ex(ixd, iyp + 1, izp + 1),
-        //                                     Ex(ixd + 1, iyp, izp),
-        //                                     Ex(ixd + 1, iyp, izp + 1),
-        //                                     Ex(ixd + 1, iyp + 1, izp),
-        //                                     Ex(ixd + 1, iyp + 1, izp + 1));
-        // }
         {
           const double v00 =
             Ex(ixd, iyp, izp) * (1 - coeffs[0]) + Ex(ixd + 1, iyp, izp) * coeffs[0];
@@ -105,15 +91,6 @@ auto interpolate(ElectroMagn &em, Patch &patch) -> void {
         // Ey (p, d, p)
         {
           const double coeffs[3] = {ixn, iyn + 0.5, izn};
-          //   Eyp(part)              = compute_interpolation(coeffs,
-          //                                     Ey(ixp, iyd, izp),
-          //                                     Ey(ixp, iyd, izp + 1),
-          //                                     Ey(ixp, iyd + 1, izp),
-          //                                     Ey(ixp, iyd + 1, izp + 1),
-          //                                     Ey(ixp + 1, iyd, izp),
-          //                                     Ey(ixp + 1, iyd, izp + 1),
-          //                                     Ey(ixp + 1, iyd + 1, izp),
-          //                                     Ey(ixp + 1, iyd + 1, izp + 1));
 
           const double v00 =
             Ey(ixp, iyd, izp) * (1 - coeffs[0]) + Ey(ixp + 1, iyd, izp) * coeffs[0];
@@ -133,15 +110,6 @@ auto interpolate(ElectroMagn &em, Patch &patch) -> void {
         // Ez (p, p, d)
         {
           const double coeffs[3] = {ixn, iyn, izn + 0.5};
-          //   Ezp(part)              = compute_interpolation(coeffs,
-          //                                     Ez(ixp, iyp, izd),
-          //                                     Ez(ixp, iyp, izd + 1),
-          //                                     Ez(ixp, iyp + 1, izd),
-          //                                     Ez(ixp, iyp + 1, izd + 1),
-          //                                     Ez(ixp + 1, iyp, izd),
-          //                                     Ez(ixp + 1, iyp, izd + 1),
-          //                                     Ez(ixp + 1, iyp + 1, izd),
-          //                                     Ez(ixp + 1, iyp + 1, izd + 1));
 
           const double v00 =
             Ez(ixp, iyp, izd) * (1 - coeffs[0]) + Ez(ixp + 1, iyp, izd) * coeffs[0];
@@ -221,16 +189,6 @@ auto interpolate(ElectroMagn &em, Patch &patch) -> void {
         {
           const double coeffs[3] = {ixn + 0.5, iyn + 0.5, izn};
 
-          // Bzp(part)              = compute_interpolation(coeffs,
-          //                                   Bz(ixd, iyd, izp),
-          //                                   Bz(ixd, iyd, izp + 1),
-          //                                   Bz(ixd, iyd + 1, izp),
-          //                                   Bz(ixd, iyd + 1, izp + 1),
-          //                                   Bz(ixd + 1, iyd, izp),
-          //                                   Bz(ixd + 1, iyd, izp + 1),
-          //                                   Bz(ixd + 1, iyd + 1, izp),
-          //                                   Bz(ixd + 1, iyd + 1, izp + 1));
-
           const double v00 =
             Bz(ixd, iyd, izp) * (1 - coeffs[0]) + Bz(ixd + 1, iyd, izp) * coeffs[0];
           const double v01 =
@@ -260,31 +218,31 @@ auto interpolate(ElectroMagn &em, Patch &patch) -> void {
 //! \param[in] patch  patch data structure
 //! \param[in] dt time step to use for the pusher
 // ______________________________________________________________________________
-auto push(Patch &patch, double dt) -> void {
+auto push(std::vector<Particles<mini_float>> &particles, double dt) -> void {
 
   // For each species
-  for (int is = 0; is < patch.n_species_m; is++) {
+  for (size_t is = 0; is < particles.size(); is++) {
 
-    const int n_particles = patch.particles_m[is].size();
+    const int n_particles = particles[is].size();
 
     // q' = dt * (q/2m)
-    const mini_float qp = patch.particles_m[is].charge_m * dt * 0.5 / patch.particles_m[is].mass_m;
+    const mini_float qp = particles[is].charge_m * dt * 0.5 / particles[is].mass_m;
 
-    device_vector_t x = patch.particles_m[is].x_.data_;
-    device_vector_t y = patch.particles_m[is].y_.data_;
-    device_vector_t z = patch.particles_m[is].z_.data_;
+    device_vector_t x = particles[is].x_.data_;
+    device_vector_t y = particles[is].y_.data_;
+    device_vector_t z = particles[is].z_.data_;
 
-    device_vector_t mx = patch.particles_m[is].mx_.data_;
-    device_vector_t my = patch.particles_m[is].my_.data_;
-    device_vector_t mz = patch.particles_m[is].mz_.data_;
+    device_vector_t mx = particles[is].mx_.data_;
+    device_vector_t my = particles[is].my_.data_;
+    device_vector_t mz = particles[is].mz_.data_;
 
-    device_vector_t Exp = patch.particles_m[is].Ex_.data_;
-    device_vector_t Eyp = patch.particles_m[is].Ey_.data_;
-    device_vector_t Ezp = patch.particles_m[is].Ez_.data_;
+    device_vector_t Exp = particles[is].Ex_.data_;
+    device_vector_t Eyp = particles[is].Ey_.data_;
+    device_vector_t Ezp = particles[is].Ez_.data_;
 
-    device_vector_t Bxp = patch.particles_m[is].Bx_.data_;
-    device_vector_t Byp = patch.particles_m[is].By_.data_;
-    device_vector_t Bzp = patch.particles_m[is].Bz_.data_;
+    device_vector_t Bxp = particles[is].Bx_.data_;
+    device_vector_t Byp = particles[is].By_.data_;
+    device_vector_t Bzp = particles[is].Bz_.data_;
 
     Kokkos::parallel_for(
       n_particles,
@@ -342,46 +300,36 @@ auto push(Patch &patch, double dt) -> void {
 
     Kokkos::fence();
 
-    // Copy the data from the device to the host
-    // patch.particles_m[is].copy_device_to_host();
-
-    // patch.particles_m[is].check(patch.inf_m[0], patch.sup_m[0], patch.inf_m[1], patch.sup_m[1],
-    // patch.inf_m[2], patch.sup_m[2]);
-
-    // patch.particles_m[is].print();
-
-    // patch.particles_m[is].check_sum();
-
   } // Loop on species
 }
 
 // ______________________________________________________________________________
 //
 //! \brief Push only the momentum
-//! \param[in] patch  patch data structure
+//! \param[in] particles vector of species Particles
 //! \param[in] dt time step to use for the pusher
 // ______________________________________________________________________________
-auto push_momentum(Patch &patch, double dt) -> void {
+auto push_momentum(std::vector<Particles<mini_float>> &particles, double dt) -> void {
 
   // for each species
-  for (int is = 0; is < patch.n_species_m; is++) {
+  for (size_t is = 0; is < particles.size(); is++) {
 
-    const int n_particles = patch.particles_m[is].size();
+    const int n_particles = particles[is].size();
 
     // q' = dt * (q/2m)
-    const mini_float qp = patch.particles_m[is].charge_m * dt * 0.5 / patch.particles_m[is].mass_m;
+    const mini_float qp = particles[is].charge_m * dt * 0.5 / particles[is].mass_m;
 
-    device_vector_t mx = patch.particles_m[is].mx_.data_;
-    device_vector_t my = patch.particles_m[is].my_.data_;
-    device_vector_t mz = patch.particles_m[is].mz_.data_;
+    device_vector_t mx = particles[is].mx_.data_;
+    device_vector_t my = particles[is].my_.data_;
+    device_vector_t mz = particles[is].mz_.data_;
 
-    device_vector_t Exp = patch.particles_m[is].Ex_.data_;
-    device_vector_t Eyp = patch.particles_m[is].Ey_.data_;
-    device_vector_t Ezp = patch.particles_m[is].Ez_.data_;
+    device_vector_t Exp = particles[is].Ex_.data_;
+    device_vector_t Eyp = particles[is].Ey_.data_;
+    device_vector_t Ezp = particles[is].Ez_.data_;
 
-    device_vector_t Bxp = patch.particles_m[is].Bx_.data_;
-    device_vector_t Byp = patch.particles_m[is].By_.data_;
-    device_vector_t Bzp = patch.particles_m[is].Bz_.data_;
+    device_vector_t Bxp = particles[is].Bx_.data_;
+    device_vector_t Byp = particles[is].By_.data_;
+    device_vector_t Bzp = particles[is].Bz_.data_;
 
     Kokkos::parallel_for(
       n_particles,
@@ -444,9 +392,7 @@ auto push_momentum(Patch &patch, double dt) -> void {
 //! \param[in] Params & params - constant global simulation parameters
 //! \param[in] Patch & patch - current patch
 // _____________________________________________________________________
-auto pushBC(Params &params, Patch &patch) -> void {
-
-  if (patch.on_border_m) {
+auto pushBC(Params &params, std::vector<Particles<mini_float>> &particles) -> void {
 
     const mini_float inf_global[3] = {params.inf_x, params.inf_y, params.inf_z};
     const mini_float sup_global[3] = {params.sup_x, params.sup_y, params.sup_z};
@@ -454,16 +400,15 @@ auto pushBC(Params &params, Patch &patch) -> void {
     // Periodic conditions
     if (params.boundary_condition_code == 1) {
 
-      const int N_patches[3]     = {patch.nx_patchs_m, patch.ny_patchs_m, patch.nz_patchs_m};
       const mini_float length[3] = {params.Lx, params.Ly, params.Lz};
 
-      for (int is = 0; is < patch.n_species_m; is++) {
+      for (size_t is = 0; is < particles.size(); is++) {
 
-        unsigned int n_particles = patch.particles_m[is].size();
+        unsigned int n_particles = particles[is].size();
 
-        device_vector_t x = patch.particles_m[is].x_.data_;
-        device_vector_t y = patch.particles_m[is].y_.data_;
-        device_vector_t z = patch.particles_m[is].z_.data_;
+        device_vector_t x = particles[is].x_.data_;
+        device_vector_t y = particles[is].y_.data_;
+        device_vector_t z = particles[is].z_.data_;
 
         Kokkos::parallel_for(
           n_particles,
@@ -471,10 +416,6 @@ auto pushBC(Params &params, Patch &patch) -> void {
             mini_float *pos[3] = {&x(part), &y(part), &z(part)};
 
             for (int d = 0; d < 3; d++) {
-
-              // Only relevant if there is just 1 patch in this direction
-              // Else the patch exchange with periodicity is managed in the dedicated function
-              if (N_patches[d] == 1) {
                 if (*pos[d] >= sup_global[d]) {
 
                   *pos[d] -= length[d];
@@ -483,7 +424,6 @@ auto pushBC(Params &params, Patch &patch) -> void {
 
                   *pos[d] += length[d];
                 }
-              }
             }
           } // End loop on particles
 
@@ -495,17 +435,17 @@ auto pushBC(Params &params, Patch &patch) -> void {
 
       // Reflective conditions
     } else if (params.boundary_condition_code == 2) {
-      for (int is = 0; is < patch.n_species_m; is++) {
+      for (size_t is = 0; is < particles.size(); is++) {
 
-        unsigned int n_particles = patch.particles_m[is].size();
+        unsigned int n_particles = particles[is].size();
 
-        device_vector_t x = patch.particles_m[is].x_.data_;
-        device_vector_t y = patch.particles_m[is].y_.data_;
-        device_vector_t z = patch.particles_m[is].z_.data_;
+        device_vector_t x = particles[is].x_.data_;
+        device_vector_t y = particles[is].y_.data_;
+        device_vector_t z = particles[is].z_.data_;
 
-        device_vector_t mx = patch.particles_m[is].mx_.data_;
-        device_vector_t my = patch.particles_m[is].my_.data_;
-        device_vector_t mz = patch.particles_m[is].mz_.data_;
+        device_vector_t mx = particles[is].mx_.data_;
+        device_vector_t my = particles[is].my_.data_;
+        device_vector_t mz = particles[is].mz_.data_;
 
         Kokkos::parallel_for(
           n_particles,
@@ -535,7 +475,6 @@ auto pushBC(Params &params, Patch &patch) -> void {
 
       } // End loop on species
     } // if type of conditions
-  } // if on border
 }
 
 // _______________________________________________________________________

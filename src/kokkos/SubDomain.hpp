@@ -370,8 +370,8 @@ public:
                 << "\n"
                 << std::endl;
 
-        operators::interpolate(em_, patches_[0]);
-        operators::push_momentum(patches_[0], -0.5 * params.dt);
+        operators::interpolate(em_, patches_[0].particles_m);
+        operators::push_momentum(patches_[0].particles_m, -0.5 * params.dt);
     }
 
     // For each species, print :
@@ -510,21 +510,21 @@ public:
       // Interpolate from global field to particles in patch
       DEBUG("  -> start interpolate for patch ");
 
-      operators::interpolate(em_, patches_[0]);
+      operators::interpolate(em_, patches_[0].particles_m);
 
       DEBUG("  -> stop interpolate");
 
       // Push all particles in patch
       DEBUG("  -> start push for patch ");
 
-      operators::push(patches_[0], params.dt);
+      operators::push(patches_[0].particles_m, params.dt);
 
       DEBUG("  -> stop push");
 
       // Do boundary conditions on global domain
       DEBUG("  -> Patch 0: start pushBC");
 
-      operators::pushBC(params, patches_[0]);
+      operators::pushBC(params, patches_[0].particles_m);
 
       DEBUG("  -> stop pushBC");
 
