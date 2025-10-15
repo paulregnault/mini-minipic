@@ -627,9 +627,7 @@ public:
 
     for (size_t is = 0; is < params.get_species_number(); ++is) {
       if (need_species[is]) {
-        for (size_t ipatch = 0; ipatch < patches_.size(); ++ipatch) {
-          patches_[ipatch].particles_m[is].sync(minipic::device, minipic::host);
-        }
+          particles[is].sync(minipic::device, minipic::host);
       }
     }
 
