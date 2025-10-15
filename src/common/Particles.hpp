@@ -114,7 +114,7 @@ public:
 
   // __________________________________________________________________________
   //
-  //! \brief Give the number of particles, use std::size
+  //! \brief Give the number of particles
   // __________________________________________________________________________
   unsigned int size() const { return n_particles_m; }
 

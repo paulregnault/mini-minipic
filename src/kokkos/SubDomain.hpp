@@ -28,9 +28,6 @@ public:
   //! List of species to handle
   std::vector<Particles<mini_float>> particles_m;
 
-  //! Flags to determine if the species is projected or not
-  std::vector<bool> projected_;
-
   //! Boundaries box of the subdomain
   double inf_m[3];
   double sup_m[3];
@@ -83,9 +80,6 @@ public:
     // Alloc vector for each species
     if (n_species > 0) {
       particles_m.resize(n_species);
-
-      // Alloc projected flags
-      projected_.resize(n_species);
     }    
 
     for (int is = 0; is < n_species; is++) {
@@ -370,8 +364,8 @@ public:
                 << "\n"
                 << std::endl;
 
-        operators::interpolate(em_, patches_[0].particles_m);
-        operators::push_momentum(patches_[0].particles_m, -0.5 * params.dt);
+        operators::interpolate(em_, particles_m);
+        operators::push_momentum(particles_m, -0.5 * params.dt);
     }
 
     // For each species, print :
@@ -380,9 +374,9 @@ public:
       unsigned int total_number_of_particles = 0;
       double total_particle_energy           = 0;
 
-      total_number_of_particles += patches_[0].particles_m[is].size();
+      total_number_of_particles += particles_m[is].size();
       total_particle_energy +=
-        patches_[0].particles_m[is].get_kinetic_energy(minipic::host);
+        particles_m[is].get_kinetic_energy(minipic::host);
 
       std::cout << " Species " << params.species_names_[is] << std::endl;
 
@@ -447,33 +441,33 @@ public:
 
       for (size_t is = 0; is < params.species_names_.size(); ++is) {
 
-        sum_host[0] += patches_[0].particles_m[is].weight_.sum(1, minipic::host);
-        sum_host[1] += patches_[0].particles_m[is].x_.sum(1, minipic::host);
-        sum_host[2] += patches_[0].particles_m[is].y_.sum(1, minipic::host);
-        sum_host[3] += patches_[0].particles_m[is].z_.sum(1, minipic::host);
-        sum_host[4] += patches_[0].particles_m[is].mx_.sum(1, minipic::host);
-        sum_host[5] += patches_[0].particles_m[is].my_.sum(1, minipic::host);
-        sum_host[6] += patches_[0].particles_m[is].mz_.sum(1, minipic::host);
-        sum_host[7] += patches_[0].particles_m[is].Ex_.sum(1, minipic::host);
-        sum_host[8] += patches_[0].particles_m[is].Ey_.sum(1, minipic::host);
-        sum_host[9] += patches_[0].particles_m[is].Ez_.sum(1, minipic::host);
-        sum_host[10] += patches_[0].particles_m[is].Bx_.sum(1, minipic::host);
-        sum_host[11] += patches_[0].particles_m[is].By_.sum(1, minipic::host);
-        sum_host[12] += patches_[0].particles_m[is].Bz_.sum(1, minipic::host);
+        sum_host[0] += particles_m[is].weight_.sum(1, minipic::host);
+        sum_host[1] += particles_m[is].x_.sum(1, minipic::host);
+        sum_host[2] += particles_m[is].y_.sum(1, minipic::host);
+        sum_host[3] += particles_m[is].z_.sum(1, minipic::host);
+        sum_host[4] += particles_m[is].mx_.sum(1, minipic::host);
+        sum_host[5] += particles_m[is].my_.sum(1, minipic::host);
+        sum_host[6] += particles_m[is].mz_.sum(1, minipic::host);
+        sum_host[7] += particles_m[is].Ex_.sum(1, minipic::host);
+        sum_host[8] += particles_m[is].Ey_.sum(1, minipic::host);
+        sum_host[9] += particles_m[is].Ez_.sum(1, minipic::host);
+        sum_host[10] += particles_m[is].Bx_.sum(1, minipic::host);
+        sum_host[11] += particles_m[is].By_.sum(1, minipic::host);
+        sum_host[12] += particles_m[is].Bz_.sum(1, minipic::host);
 
-        sum_device[0] += patches_[0].particles_m[is].weight_.sum(1, minipic::device);
-        sum_device[1] += patches_[0].particles_m[is].x_.sum(1, minipic::device);
-        sum_device[2] += patches_[0].particles_m[is].y_.sum(1, minipic::device);
-        sum_device[3] += patches_[0].particles_m[is].z_.sum(1, minipic::device);
-        sum_device[4] += patches_[0].particles_m[is].mx_.sum(1, minipic::device);
-        sum_device[5] += patches_[0].particles_m[is].my_.sum(1, minipic::device);
-        sum_device[6] += patches_[0].particles_m[is].mz_.sum(1, minipic::device);
-        sum_device[7] += patches_[0].particles_m[is].Ex_.sum(1, minipic::device);
-        sum_device[8] += patches_[0].particles_m[is].Ey_.sum(1, minipic::device);
-        sum_device[9] += patches_[0].particles_m[is].Ez_.sum(1, minipic::device);
-        sum_device[10] += patches_[0].particles_m[is].Bx_.sum(1, minipic::device);
-        sum_device[11] += patches_[0].particles_m[is].By_.sum(1, minipic::device);
-        sum_device[12] += patches_[0].particles_m[is].Bz_.sum(1, minipic::device);
+        sum_device[0] += particles_m[is].weight_.sum(1, minipic::device);
+        sum_device[1] += particles_m[is].x_.sum(1, minipic::device);
+        sum_device[2] += particles_m[is].y_.sum(1, minipic::device);
+        sum_device[3] += particles_m[is].z_.sum(1, minipic::device);
+        sum_device[4] += particles_m[is].mx_.sum(1, minipic::device);
+        sum_device[5] += particles_m[is].my_.sum(1, minipic::device);
+        sum_device[6] += particles_m[is].mz_.sum(1, minipic::device);
+        sum_device[7] += particles_m[is].Ex_.sum(1, minipic::device);
+        sum_device[8] += particles_m[is].Ey_.sum(1, minipic::device);
+        sum_device[9] += particles_m[is].Ez_.sum(1, minipic::device);
+        sum_device[10] += particles_m[is].Bx_.sum(1, minipic::device);
+        sum_device[11] += particles_m[is].By_.sum(1, minipic::device);
+        sum_device[12] += particles_m[is].Bz_.sum(1, minipic::device);
       }
 
     std::cout << std::endl;
@@ -510,21 +504,21 @@ public:
       // Interpolate from global field to particles in patch
       DEBUG("  -> start interpolate for patch ");
 
-      operators::interpolate(em_, patches_[0].particles_m);
+      operators::interpolate(em_, particles_m);
 
       DEBUG("  -> stop interpolate");
 
       // Push all particles in patch
       DEBUG("  -> start push for patch ");
 
-      operators::push(patches_[0].particles_m, params.dt);
+      operators::push(particles_m, params.dt);
 
       DEBUG("  -> stop push");
 
       // Do boundary conditions on global domain
       DEBUG("  -> Patch 0: start pushBC");
 
-      operators::pushBC(params, patches_[0].particles_m);
+      operators::pushBC(params, particles_m);
 
       DEBUG("  -> stop pushBC");
 
@@ -545,7 +539,7 @@ public:
       if (params.current_projection) {
 
         // Projection directly in the global grid
-        operators::project(params, em_, patches_[0]);
+        operators::project(params, em_, particles_m);
 
       }
 
@@ -659,7 +653,7 @@ public:
           // Call the particle binning function using the properties in particle_binning
           Diags::particle_binning(particle_binning.name_,
                                   params,
-                                  patches_,
+                                  particles_m[is],
                                   particle_binning.projected_parameter_,
                                   particle_binning.axis_,
                                   particle_binning.n_cells_,
@@ -680,7 +674,7 @@ public:
 
       for (size_t is = 0; is < params.get_species_number(); ++is) {
 
-        Diags::particle_cloud("cloud", params, patches_, is, it, params.particle_cloud_format);
+        Diags::particle_cloud("cloud", params, particles_m[is], is, it, params.particle_cloud_format);
       }
     }
 
@@ -694,7 +688,7 @@ public:
     if (!(it % params.scalar_diagnostics_period)) {
       for (size_t is = 0; is < params.get_species_number(); ++is) {
 
-        Diags::scalars(params, patches_, is, it);
+        Diags::scalars(params, particles_m[is], is, it);
       }
     }
 
@@ -713,7 +707,11 @@ public:
   // __________________________________________________________________
   unsigned int get_total_number_of_particles() {
     unsigned int total_number_of_particles = 0;
-    total_number_of_particles = patches_[0].get_total_number_of_particles();
+
+    for (size_t is = 0; is < particles_m.size(); ++is) {
+      total_number_of_particles += particles_m[is].size();
+    }
+
     return total_number_of_particles;
   }
 

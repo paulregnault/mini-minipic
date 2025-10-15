@@ -15,7 +15,7 @@ namespace operators {
 //! \brief Interpolation operator at the patch level :
 //! interpolate EM fields from global grid for each particle
 //! \param[in] em  global electromagnetic fields
-//! \param[in] patch  patch data structure
+//! \param[in] particles  vector of particle species
 // ______________________________________________________________________________
 auto interpolate(ElectroMagn &em, std::vector<Particles<mini_float>> &particles) -> void {
 
@@ -160,16 +160,6 @@ auto interpolate(ElectroMagn &em, std::vector<Particles<mini_float>> &particles)
         {
           const double coeffs[3] = {ixn + 0.5, iyn, izn + 0.5};
 
-          // Byp(part)              = compute_interpolation(coeffs,
-          //                                   By(ixd, iyp, izd),
-          //                                   By(ixd, iyp, izd + 1),
-          //                                   By(ixd, iyp + 1, izd),
-          //                                   By(ixd, iyp + 1, izd + 1),
-          //                                   By(ixd + 1, iyp, izd),
-          //                                   By(ixd + 1, iyp, izd + 1),
-          //                                   By(ixd + 1, iyp + 1, izd),
-          //                                   By(ixd + 1, iyp + 1, izd + 1));
-
           const double v00 =
             By(ixd, iyp, izd) * (1 - coeffs[0]) + By(ixd + 1, iyp, izd) * coeffs[0];
           const double v01 =
@@ -215,7 +205,7 @@ auto interpolate(ElectroMagn &em, std::vector<Particles<mini_float>> &particles)
 // ______________________________________________________________________________
 //
 //! \brief Move the particle in the space, compute with EM fields interpolate
-//! \param[in] patch  patch data structure
+//! \param[in] particles  vector of particle species
 //! \param[in] dt time step to use for the pusher
 // ______________________________________________________________________________
 auto push(std::vector<Particles<mini_float>> &particles, double dt) -> void {
@@ -479,186 +469,12 @@ auto pushBC(Params &params, std::vector<Particles<mini_float>> &particles) -> vo
 
 // _______________________________________________________________________
 //
-//! \brief Current projection from global particles position to local grid
-//! \param params global parameters
-//! \param patch current patch
-// _______________________________________________________________________
-auto project(Params &params, Patch &patch) -> void {
-
-  for (int is = 0; is < patch.n_species_m; is++) {
-
-    patch.vec_Jx_m[is].reset(minipic::device);
-    patch.vec_Jy_m[is].reset(minipic::device);
-    patch.vec_Jz_m[is].reset(minipic::device);
-
-#if defined(__MINIPIC_DEBUG__)
-    patch.particles_m[is].sync(minipic::device, minipic::host);
-    patch.particles_m[is].check(params.inf_x - params.dx,
-                                params.sup_x + params.dx,
-                                params.inf_y - params.dy,
-                                params.sup_y + params.dy,
-                                params.inf_z - params.dz,
-                                params.sup_z + params.dz);
-    // particles_m[is].print();
-    // particles_m[is].check_sum();
-#endif
-
-    const int n_particles = patch.particles_m[is].size();
-    if (n_particles > 0) {
-
-      const double inv_cell_volume_x_q = params.inv_cell_volume * patch.particles_m[is].charge_m;
-      const double dt                  = params.dt;
-
-      const double inv_dx = params.inv_dx;
-      const double inv_dy = params.inv_dy;
-      const double inv_dz = params.inv_dz;
-
-      const double xmin = patch.inf_m[0];
-      const double ymin = patch.inf_m[1];
-      const double zmin = patch.inf_m[2];
-
-      device_field_t Jx_species = patch.vec_Jx_m[is].data_m;
-      device_field_t Jy_species = patch.vec_Jy_m[is].data_m;
-      device_field_t Jz_species = patch.vec_Jz_m[is].data_m;
-
-      device_vector_t w = patch.particles_m[is].weight_.data_;
-
-      device_vector_t x = patch.particles_m[is].x_.data_;
-      device_vector_t y = patch.particles_m[is].y_.data_;
-      device_vector_t z = patch.particles_m[is].z_.data_;
-
-      device_vector_t mx = patch.particles_m[is].mx_.data_;
-      device_vector_t my = patch.particles_m[is].my_.data_;
-      device_vector_t mz = patch.particles_m[is].mz_.data_;
-
-#if defined(__MINIPIC_KOKKOS_SCATTERVIEW__)
-      Kokkos::Experimental::ScatterView<double ***> scatter_Jx_loc(Jx_species);
-      Kokkos::Experimental::ScatterView<double ***> scatter_Jy_loc(Jy_species);
-      Kokkos::Experimental::ScatterView<double ***> scatter_Jz_loc(Jz_species);
-#else
-      Kokkos::View<double ***, Kokkos::MemoryTraits<Kokkos::Atomic>> Jx_loc = Jx_species;
-      Kokkos::View<double ***, Kokkos::MemoryTraits<Kokkos::Atomic>> Jy_loc = Jy_species;
-      Kokkos::View<double ***, Kokkos::MemoryTraits<Kokkos::Atomic>> Jz_loc = Jz_species;
-#endif
-
-      Kokkos::parallel_for(
-        n_particles,
-        KOKKOS_LAMBDA(const int part) {
-
-#if defined(__MINIPIC_KOKKOS_SCATTERVIEW__)
-          auto Jx_loc = scatter_Jx_loc.access();
-          auto Jy_loc = scatter_Jy_loc.access();
-          auto Jz_loc = scatter_Jz_loc.access();
-#endif
-
-          const double charge_weight = inv_cell_volume_x_q * w(part);
-
-          // gamma-factor
-          const double gamma_inv =
-            1 / Kokkos::sqrt(1 + (mx(part) * mx(part) + my(part) * my(part) + mz(part) * mz(part)));
-
-          const double vx = mx(part) * gamma_inv;
-          const double vy = my(part) * gamma_inv;
-          const double vz = mz(part) * gamma_inv;
-
-          // Current from the particle
-          const double Jxp = vx * charge_weight;
-          const double Jyp = vy * charge_weight;
-          const double Jzp = vz * charge_weight;
-
-          // Calculate normalized position relative to the patch
-          // ixn = (particles_m[is].x(part) ) * params.inv_dx;
-          // iyn = (particles_m[is].y(part) ) * params.inv_dy;
-          // izn = (particles_m[is].z(part) ) * params.inv_dz;
-          const double posxn = (x(part) - 0.5 * dt * vx - xmin) * inv_dx + 1;
-          const double posyn = (y(part) - 0.5 * dt * vy - ymin) * inv_dy + 1;
-          const double poszn = (z(part) - 0.5 * dt * vz - zmin) * inv_dz + 1;
-
-          // Compute indexes in primal grid
-          const int ixp = (int)(Kokkos::floor(posxn));
-          const int iyp = (int)(Kokkos::floor(posyn));
-          const int izp = (int)(Kokkos::floor(poszn));
-
-          // Compute indexes in dual grid
-          // For the current, the dual grid is 0.5 * dx shorter on each side of the grid (if dual
-          // directions only)
-          const int ixd = (int)(Kokkos::floor(posxn - 0.5));
-          const int iyd = (int)(Kokkos::floor(posyn - 0.5));
-          const int izd = (int)(Kokkos::floor(poszn - 0.5));
-
-          // Projection particle on currant field
-          // Compute interpolation coeff, p = primal, d = dual
-
-          double coeffs[3];
-
-          coeffs[0] = posxn - 0.5 - ixd;
-          coeffs[1] = posyn - iyp;
-          coeffs[2] = poszn - izp;
-
-          Jx_loc(ixd, iyp, izp) += (1 - coeffs[0]) * (1 - coeffs[1]) * (1 - coeffs[2]) * Jxp;
-          Jx_loc(ixd, iyp, izp + 1) += (1 - coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jxp;
-          Jx_loc(ixd, iyp + 1, izp) += (1 - coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jxp;
-          Jx_loc(ixd, iyp + 1, izp + 1) += (1 - coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jxp;
-          Jx_loc(ixd + 1, iyp, izp) += (coeffs[0]) * (1 - coeffs[1]) * (1 - coeffs[2]) * Jxp;
-          Jx_loc(ixd + 1, iyp, izp + 1) += (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jxp;
-          Jx_loc(ixd + 1, iyp + 1, izp) += (coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jxp;
-          Jx_loc(ixd + 1, iyp + 1, izp + 1) += (coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jxp;
-
-          coeffs[0] = posxn - ixp;
-          coeffs[1] = posyn - 0.5 - iyd;
-          coeffs[2] = poszn - izp;
-
-          Jy_loc(ixp, iyd, izp) += (1 - coeffs[0]) * (1 - coeffs[1]) * (1 - coeffs[2]) * Jyp;
-          Jy_loc(ixp, iyd, izp + 1) += (1 - coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jyp;
-          Jy_loc(ixp, iyd + 1, izp) += (1 - coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jyp;
-          Jy_loc(ixp, iyd + 1, izp + 1) += (1 - coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jyp;
-          Jy_loc(ixp + 1, iyd, izp) += (coeffs[0]) * (1 - coeffs[1]) * (1 - coeffs[2]) * Jyp;
-          Jy_loc(ixp + 1, iyd, izp + 1) += (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jyp;
-          Jy_loc(ixp + 1, iyd + 1, izp) += (coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jyp;
-          Jy_loc(ixp + 1, iyd + 1, izp + 1) += (coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jyp;
-
-          coeffs[0] = posxn - ixp;
-          coeffs[1] = posyn - iyp;
-          coeffs[2] = poszn - 0.5 - izd;
-
-          Jz_loc(ixp, iyp, izd) += (1 - coeffs[0]) * (1 - coeffs[1]) * (1 - coeffs[2]) * Jzp;
-          Jz_loc(ixp, iyp, izd + 1) += (1 - coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jzp;
-          Jz_loc(ixp, iyp + 1, izd) += (1 - coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jzp;
-          Jz_loc(ixp, iyp + 1, izd + 1) += (1 - coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jzp;
-          Jz_loc(ixp + 1, iyp, izd) += (coeffs[0]) * (1 - coeffs[1]) * (1 - coeffs[2]) * Jzp;
-          Jz_loc(ixp + 1, iyp, izd + 1) += (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jzp;
-          Jz_loc(ixp + 1, iyp + 1, izd) += (coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jzp;
-          Jz_loc(ixp + 1, iyp + 1, izd + 1) += (coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jzp;
-        } // end for each particles
-
-      );
-
-      Kokkos::fence();
-
-#if defined(__MINIPIC_KOKKOS_SCATTERVIEW__)
-      Kokkos::Experimental::contribute(Jx_species, scatter_Jx_loc);
-      Kokkos::Experimental::contribute(Jy_species, scatter_Jy_loc);
-      Kokkos::Experimental::contribute(Jz_species, scatter_Jz_loc);
-#endif
-
-      patch.projected_[is] = true;
-
-    } else {
-
-      patch.projected_[is] = false;
-
-    } // end if n_particles > 0
-  } // end loop species
-}
-
-// _______________________________________________________________________
-//
 //! \brief Current projection directly in the global array
 //! \param[in] params constant global parameters
 //! \param[in] em electromagnetic fields
-//! \param[in] patch current patch to handle
+//! \param[in] particles vector of species Particles
 // _______________________________________________________________________
-void project(Params &params, ElectroMagn &em, Patch &patch) {
+void project(Params &params, ElectroMagn &em, std::vector<Particles<mini_float>> &particles) {
 
   device_field_t Jx_device = em.Jx_m.data_m;
   device_field_t Jy_device = em.Jy_m.data_m;
@@ -692,21 +508,21 @@ void project(Params &params, ElectroMagn &em, Patch &patch) {
   int nz_Jy = em.Jy_m.nz_m;
 #endif
 
-  for (int is = 0; is < patch.n_species_m; is++) {
+  for (size_t is = 0; is < particles.size(); is++) {
 
-    const int n_particles            = patch.particles_m[is].size();
-    const double inv_cell_volume_x_q = params.inv_cell_volume * patch.particles_m[is].charge_m;
+    const int n_particles            = particles[is].size();
+    const double inv_cell_volume_x_q = params.inv_cell_volume * particles[is].charge_m;
     // double m       = particles_m[is].mass_m;
 
-    device_vector_t w = patch.particles_m[is].weight_.data_;
+    device_vector_t w = particles[is].weight_.data_;
 
-    device_vector_t x = patch.particles_m[is].x_.data_;
-    device_vector_t y = patch.particles_m[is].y_.data_;
-    device_vector_t z = patch.particles_m[is].z_.data_;
+    device_vector_t x = particles[is].x_.data_;
+    device_vector_t y = particles[is].y_.data_;
+    device_vector_t z = particles[is].z_.data_;
 
-    device_vector_t mx = patch.particles_m[is].mx_.data_;
-    device_vector_t my = patch.particles_m[is].my_.data_;
-    device_vector_t mz = patch.particles_m[is].mz_.data_;
+    device_vector_t mx = particles[is].mx_.data_;
+    device_vector_t my = particles[is].my_.data_;
+    device_vector_t mz = particles[is].mz_.data_;
 
     Kokkos::parallel_for(
       n_particles,
@@ -785,20 +601,6 @@ void project(Params &params, ElectroMagn &em, Patch &patch) {
         Jx(ixd + 1, iyp, izp + 1) += (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jxp;
         Jx(ixd + 1, iyp + 1, izp) += (coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jxp;
         Jx(ixd + 1, iyp + 1, izp + 1) += (coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jxp;
-        // #else
-        //  // Use kokkos atomics
-        //  Kokkos::atomic_add(&Jx_device(ixd, iyp, izp), (1 - coeffs[0]) * (1 - coeffs[1]) * (1 -
-        //  coeffs[2]) * Jxp); Kokkos::atomic_add(&Jx_device(ixd, iyp, izp + 1), (1 - coeffs[0]) *
-        //  (1 - coeffs[1]) * (coeffs[2]) * Jxp); Kokkos::atomic_add(&Jx_device(ixd, iyp + 1, izp),
-        //  (1 - coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jxp);
-        //  Kokkos::atomic_add(&Jx_device(ixd, iyp + 1, izp + 1), (1 - coeffs[0]) * (coeffs[1]) *
-        //  (coeffs[2]) * Jxp); Kokkos::atomic_add(&Jx_device(ixd + 1, iyp, izp), (coeffs[0]) * (1 -
-        //  coeffs[1]) * (1 - coeffs[2]) * Jxp); Kokkos::atomic_add(&Jx_device(ixd + 1, iyp, izp +
-        //  1), (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jxp);
-        //  Kokkos::atomic_add(&Jx_device(ixd + 1, iyp + 1, izp), (coeffs[0]) * (coeffs[1]) * (1 -
-        //  coeffs[2]) * Jxp); Kokkos::atomic_add(&Jx_device(ixd + 1, iyp + 1, izp + 1), (coeffs[0])
-        //  * (coeffs[1]) * (coeffs[2]) * Jxp);
-        // #endif
 
         coeffs[0] = posxn - ixp;
         coeffs[1] = posyn - 0.5 - iyd;
@@ -813,20 +615,6 @@ void project(Params &params, ElectroMagn &em, Patch &patch) {
         Jy(ixp + 1, iyd, izp + 1) += (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jyp;
         Jy(ixp + 1, iyd + 1, izp) += (coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jyp;
         Jy(ixp + 1, iyd + 1, izp + 1) += (coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jyp;
-        // #else
-        //  Use kokkos atomics
-        //  Kokkos::atomic_add(&Jy_device(ixp, iyd, izp), (1 - coeffs[0]) * (1 - coeffs[1]) * (1 -
-        //  coeffs[2]) * Jyp); Kokkos::atomic_add(&Jy_device(ixp, iyd, izp + 1), (1 - coeffs[0]) *
-        //  (1 - coeffs[1]) * (coeffs[2]) * Jyp); Kokkos::atomic_add(&Jy_device(ixp, iyd + 1, izp),
-        //  (1 - coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jyp);
-        //  Kokkos::atomic_add(&Jy_device(ixp, iyd + 1, izp + 1), (1 - coeffs[0]) * (coeffs[1]) *
-        //  (coeffs[2]) * Jyp); Kokkos::atomic_add(&Jy_device(ixp + 1, iyd, izp), (coeffs[0]) * (1 -
-        //  coeffs[1]) * (1 - coeffs[2]) * Jyp); Kokkos::atomic_add(&Jy_device(ixp + 1, iyd, izp +
-        //  1), (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jyp);
-        //  Kokkos::atomic_add(&Jy_device(ixp + 1, iyd + 1, izp), (coeffs[0]) * (coeffs[1]) * (1 -
-        //  coeffs[2]) * Jyp); Kokkos::atomic_add(&Jy_device(ixp + 1, iyd + 1, izp + 1), (coeffs[0])
-        //  * (coeffs[1]) * (coeffs[2]) * Jyp);
-        // #endif
 
         coeffs[0] = posxn - ixp;
         coeffs[1] = posyn - iyp;
@@ -841,20 +629,7 @@ void project(Params &params, ElectroMagn &em, Patch &patch) {
         Jz(ixp + 1, iyp, izd + 1) += (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jzp;
         Jz(ixp + 1, iyp + 1, izd) += (coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jzp;
         Jz(ixp + 1, iyp + 1, izd + 1) += (coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jzp;
-        // #else
-        //  // Use kokkos atomics
-        //  Kokkos::atomic_add(&Jz_device(ixp, iyp, izd), (1 - coeffs[0]) * (1 - coeffs[1]) * (1 -
-        //  coeffs[2]) * Jzp); Kokkos::atomic_add(&Jz_device(ixp, iyp, izd + 1), (1 - coeffs[0]) *
-        //  (1 - coeffs[1]) * (coeffs[2]) * Jzp); Kokkos::atomic_add(&Jz_device(ixp, iyp + 1, izd),
-        //  (1 - coeffs[0]) * (coeffs[1]) * (1 - coeffs[2]) * Jzp);
-        //  Kokkos::atomic_add(&Jz_device(ixp, iyp + 1, izd + 1), (1 - coeffs[0]) * (coeffs[1]) *
-        //  (coeffs[2]) * Jzp); Kokkos::atomic_add(&Jz_device(ixp + 1, iyp, izd), (coeffs[0]) * (1 -
-        //  coeffs[1]) * (1 - coeffs[2]) * Jzp); Kokkos::atomic_add(&Jz_device(ixp + 1, iyp, izd +
-        //  1), (coeffs[0]) * (1 - coeffs[1]) * (coeffs[2]) * Jzp);
-        //  Kokkos::atomic_add(&Jz_device(ixp + 1, iyp + 1, izd), (coeffs[0]) * (coeffs[1]) * (1 -
-        //  coeffs[2]) * Jzp); Kokkos::atomic_add(&Jz_device(ixp + 1, iyp + 1, izd + 1), (coeffs[0])
-        //  * (coeffs[1]) * (coeffs[2]) * Jzp);
-        // #endif
+
       } // end for each particles
     );
 
@@ -864,7 +639,7 @@ void project(Params &params, ElectroMagn &em, Patch &patch) {
     Kokkos::Experimental::contribute(Jy_device, scatter_Jy);
     Kokkos::Experimental::contribute(Jz_device, scatter_Jz);
 #endif
-    // particles_m[is].sync(minipic::device, minipic::host);
+
   }
 }
 
@@ -1276,119 +1051,6 @@ auto solveBC(Params &params, ElectroMagn &em) -> void {
   } // End if
 } // End solveBC
 
-// ______________________________________________________
-//
-//! \brief Sum all species local current grids in local grid
-//! \param[in] patch  current patch to handle
-// ______________________________________________________
-auto reduc_current(Patch &patch) -> void {
-
-  for (int is = 1; is < patch.n_species_m; is++) {
-
-    // Only if particles projected
-    if (patch.projected_[is]) {
-
-      device_field_t Jx_0  = patch.vec_Jx_m[0].data_m;
-      device_field_t Jx_is = patch.vec_Jx_m[is].data_m;
-
-      device_field_t Jy_0  = patch.vec_Jy_m[0].data_m;
-      device_field_t Jy_is = patch.vec_Jy_m[is].data_m;
-
-      device_field_t Jz_0  = patch.vec_Jz_m[0].data_m;
-      device_field_t Jz_is = patch.vec_Jz_m[is].data_m;
-
-      typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>> mdrange_policy;
-      Kokkos::parallel_for(
-        mdrange_policy({0, 0, 0},
-                       {patch.vec_Jx_m[is].nx(), patch.vec_Jx_m[is].ny(), patch.vec_Jx_m[is].nz()}),
-        KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-          Jx_0(ix, iy, iz) += Jx_is(ix, iy, iz);
-        });
-
-      typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>> mdrange_policy;
-      Kokkos::parallel_for(
-        mdrange_policy({0, 0, 0},
-                       {patch.vec_Jy_m[is].nx(), patch.vec_Jy_m[is].ny(), patch.vec_Jy_m[is].nz()}),
-        KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-          Jy_0(ix, iy, iz) += Jy_is(ix, iy, iz);
-        });
-
-      typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>> mdrange_policy;
-      Kokkos::parallel_for(
-        mdrange_policy({0, 0, 0},
-                       {patch.vec_Jz_m[is].nx(), patch.vec_Jz_m[is].ny(), patch.vec_Jz_m[is].nz()}),
-        KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-          Jz_0(ix, iy, iz) += Jz_is(ix, iy, iz);
-        });
-      Kokkos::fence();
-
-    } // end check if particles
-  } // end for species
-}
-
-// ____________________________________________________________________________
-//! \brief Copy all local current grid in the global grid
-//! \param[in] ElectroMagn & em - global electromagnetic fields
-//! \param[in] Patch & patch - current patch
-// ____________________________________________________________________________
-auto local2global(ElectroMagn &em, Patch &patch) -> void {
-
-  bool projected = false;
-
-  for (int is = 0; is < patch.n_species_m; is++) {
-    projected = projected || patch.projected_[is];
-  }
-
-  // projection only if particles in this patch
-  if (projected) {
-
-    // for (int is = 0; is < n_species_m; is++) {
-    const int i_global_p = patch.ix_origin_m;
-    const int j_global_p = patch.iy_origin_m;
-    const int k_global_p = patch.iz_origin_m;
-    const int i_global_d = patch.ix_origin_m;
-    const int j_global_d = patch.iy_origin_m;
-    const int k_global_d = patch.iz_origin_m;
-
-    // std::cerr << i_global_p  << " " << j_global_p << " " << k_global_p << std::endl;
-    // std::cerr << "nx: " << vec_Jx_m[0].nx()  << " " << em.Jx_m.nx() << " " << std::endl;
-
-    device_field_t Jx_0 = patch.vec_Jx_m[0].data_m;
-    device_field_t Jx   = em.Jx_m.data_m;
-
-    device_field_t Jy_0 = patch.vec_Jy_m[0].data_m;
-    device_field_t Jy   = em.Jy_m.data_m;
-
-    device_field_t Jz_0 = patch.vec_Jz_m[0].data_m;
-    device_field_t Jz   = em.Jz_m.data_m;
-
-    typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>> mdrange_policy;
-    Kokkos::parallel_for(
-      mdrange_policy({0, 0, 0},
-                     {patch.vec_Jx_m[0].nx(), patch.vec_Jx_m[0].ny(), patch.vec_Jx_m[0].nz()}),
-      KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-        Jx(i_global_d + ix, j_global_p + iy, k_global_p + iz) += Jx_0(ix, iy, iz);
-      });
-
-    typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>> mdrange_policy;
-    Kokkos::parallel_for(
-      mdrange_policy({0, 0, 0},
-                     {patch.vec_Jy_m[0].nx(), patch.vec_Jy_m[0].ny(), patch.vec_Jy_m[0].nz()}),
-      KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-        Jy(i_global_p + ix, j_global_d + iy, k_global_p + iz) += Jy_0(ix, iy, iz);
-      });
-
-    typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>> mdrange_policy;
-    Kokkos::parallel_for(
-      mdrange_policy({0, 0, 0},
-                     {patch.vec_Jz_m[0].nx(), patch.vec_Jz_m[0].ny(), patch.vec_Jz_m[0].nz()}),
-      KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-        Jz(i_global_p + ix, j_global_p + iy, k_global_d + iz) += Jz_0(ix, iy, iz);
-      });
-    Kokkos::fence();
-
-  } // end if total_particles
-}
 
 // ____________________________________________________________________________
 //! \brief Emit a laser field in the x direction using an antenna
