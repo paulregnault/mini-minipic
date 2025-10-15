@@ -31,9 +31,9 @@ void setup(Params &params) {
   params.nz_patch = 4;
 
   // Cells per patch per direction
-  params.nx_cells_by_patch = 8;
-  params.ny_cells_by_patch = 8;
-  params.nz_cells_by_patch = 8;
+  params.nx_cells = 8;
+  params.ny_cells = 8;
+  params.nz_cells = 8;
 
   // Time
 

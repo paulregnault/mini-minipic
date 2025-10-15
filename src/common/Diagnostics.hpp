@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "Params.hpp"
-#include "Patch.hpp"
 
 namespace Diags {
 
@@ -299,7 +298,7 @@ void particle_binning(std::string diag_name,
   }
 
 
-    // get number of particles to project in the current patch
+    // get number of particles to project
     const unsigned int n_particles = particles.size();
 
     // Compute data

@@ -10,17 +10,16 @@
 
 #include <vector>
 
-#include "Diagnotics.hpp"
+#include "ElectroMagn.hpp"
+#include "Particles.hpp"
+#include "Diagnostics.hpp"
 #include "Operators.hpp"
 #include "Params.hpp"
-#include "Patch.hpp"
 #include "Timers.hpp"
 
 //! \brief Wrapper class to clean main
 class SubDomain {
 public:
-  //! List of Patch in this subdomain, linearized by Z, Z fast
-  std::vector<Patch> patches_;
 
   // Init global fields
   ElectroMagn em_;
@@ -34,7 +33,7 @@ public:
 
   // ______________________________________________________
   //
-  //! \brief Alloc memory to store all the patch
+  //! \brief Alloc memory to store
   //! \param[in] params global parameters
   // ______________________________________________________
   void allocate(Params &params) {
@@ -45,9 +44,9 @@ public:
     // _____________________________________________________
     // Local parameters
 
-    const int nx_cells_m = params.nx_cells_by_patch;
-    const int ny_cells_m = params.ny_cells_by_patch;
-    const int nz_cells_m = params.nz_cells_by_patch;
+    const int nx_cells_m = params.nx_cells;
+    const int ny_cells_m = params.ny_cells;
+    const int nz_cells_m = params.nz_cells;
 
     // Compute boundaries box
     inf_m[0] = params.inf_x ;
@@ -83,9 +82,9 @@ public:
     }    
 
     for (int is = 0; is < n_species; is++) {
-      int n_particles = params.n_particles_by_species_in_patch[is] + params.particles_to_add_.size();
+      int n_particles = params.n_particles_by_species[is] + params.particles_to_add_.size();
 
-      // Alloc memory to store current particles in patch, and init species attributes
+      // Alloc memory to store particles
       particles_m[is].allocate(params.charge_[is],
                               params.mass_[is],
                               params.temp_[is],
@@ -95,7 +94,7 @@ public:
 
     // Particle initialization
 
-    const int total_cells = params.nx_cells_by_patch * params.ny_cells_by_patch * params.nz_cells_by_patch;
+    const int total_cells = params.nx_cells * params.ny_cells * params.nz_cells;
 
     const double cell_volume = params.cell_volume;
 
@@ -149,16 +148,16 @@ public:
 
       // Loop over all cells
 
-        for (int i = 0; i < params.nx_cells_by_patch; i++) {
-          for (int j = 0; j < params.ny_cells_by_patch; j++) {
-            for (int k = 0; k < params.nz_cells_by_patch; k++) {
+        for (int i = 0; i < params.nx_cells; i++) {
+          for (int j = 0; j < params.ny_cells; j++) {
+            for (int k = 0; k < params.nz_cells; k++) {
 
               const int i_global = i;
               const int j_global = j;
               const int k_global = k;
 
               // Local cell index
-              const int local_cell_index = i * (params.ny_cells_by_patch * params.nz_cells_by_patch) + j * params.nz_cells_by_patch + k;
+              const int local_cell_index = i * (params.ny_cells * params.nz_cells) + j * params.nz_cells + k;
 
               // Global 1d cell index
               const int global_cell_index =
@@ -343,20 +342,6 @@ public:
 
     } // end for species
 
-    // Allocate and initialize particles for each patch on host
-    patches_.resize(1);
-
-    // Memory allocate for all particles and local fields
-    patches_[0].allocate(params, 0, 0, 0);
-
-    // Particles position and momentum initialization
-    patches_[0].initialize_particles(params);
-
-    for (int is = 0; is < n_species; is++) {
-      particles_m[is].check_sum();
-      patches_[0].particles_m[is].check_sum();
-    }
-
     // Momentum correction (to respect the leap frog scheme)
     if (params.momentum_correction) {
 
@@ -501,14 +486,14 @@ public:
       DEBUG("  -> stop reset current");
     }
 
-      // Interpolate from global field to particles in patch
+      // Interpolate from global field to particles
       DEBUG("  -> start interpolate ");
 
       operators::interpolate(em_, particles_m);
 
       DEBUG("  -> stop interpolate");
 
-      // Push all particles in patch
+      // Push all particles
       DEBUG("  -> start push ");
 
       operators::push(particles_m, params.dt);

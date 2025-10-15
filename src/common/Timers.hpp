@@ -66,7 +66,7 @@ public:
     // - initilization
     // - main loop
 
-    N_patches = params.N_patches;
+    N_patches = 1;
 
     temporary_times.resize(sections.size() * (1 + N_patches));
     accumulated_times.resize(sections.size() * (1 + N_patches));

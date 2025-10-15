@@ -99,10 +99,8 @@ public:
   //! Domain decomposition
   int n_subdomains;
   int nx_patch, ny_patch, nz_patch;
-  int nx_cells_by_patch, ny_cells_by_patch, nz_cells_by_patch;
 
   //! Input computed
-  unsigned int N_patches;
   int nx_cells, ny_cells, nz_cells;
   double Lx, Ly, Lz;
   double dx, dy, dz;
@@ -160,8 +158,6 @@ public:
   //! Position init level (patch or cell)
   std::vector<std::string> position_initialization_level_;
 
-  //! Number of particles in one patch for each species at init, computed
-  std::vector<int> n_particles_by_species_in_patch;
   //! Number of particles total for each species at init, computed
   std::vector<int> n_particles_by_species;
   //! Number of particles at init, computed
@@ -261,12 +257,6 @@ public:
 
     DEBUG("Compute global parameters");
 
-    N_patches = nx_patch * ny_patch * nz_patch;
-
-    nx_cells = nx_cells_by_patch * nx_patch;
-    ny_cells = ny_cells_by_patch * ny_patch;
-    nz_cells = nz_cells_by_patch * nz_patch;
-
     Lx = sup_x - inf_x;
     Ly = sup_y - inf_y;
     Lz = sup_z - inf_z;
@@ -292,13 +282,6 @@ public:
     nx_d = nx_cells + 2;
     ny_d = ny_cells + 2;
     nz_d = nz_cells + 2;
-
-    nx_p_by_patch = nx_cells_by_patch + 1;
-    ny_p_by_patch = ny_cells_by_patch + 1;
-    nz_p_by_patch = nz_cells_by_patch + 1;
-    nx_d_by_patch = nx_cells_by_patch + 2;
-    ny_d_by_patch = ny_cells_by_patch + 2;
-    nz_d_by_patch = nz_cells_by_patch + 2;
 
     // boundary conditions
 
@@ -340,13 +323,9 @@ public:
 
     // Physics
     n_particles = 0;
-    n_particles_by_species_in_patch.resize(species_names_.size());
     n_particles_by_species.resize(species_names_.size());
     for (size_t is = 0; is < species_names_.size(); is++) {
-      n_particles_by_species_in_patch[is] =
-        nx_cells_by_patch * ny_cells_by_patch * nz_cells_by_patch * ppc_[is];
-      n_particles_by_species[is] =
-        nx_patch * ny_patch * nz_patch * n_particles_by_species_in_patch[is];
+      n_particles_by_species[is] =nx_cells * ny_cells * nz_cells * ppc_[is];
       n_particles += n_particles_by_species[is];
     }
 

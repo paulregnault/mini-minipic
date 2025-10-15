@@ -12,7 +12,7 @@ namespace operators {
 
 // ______________________________________________________________________________
 //
-//! \brief Interpolation operator at the patch level :
+//! \brief Interpolation operator :
 //! interpolate EM fields from global grid for each particle
 //! \param[in] em  global electromagnetic fields
 //! \param[in] particles  vector of particle species
@@ -380,7 +380,7 @@ auto push_momentum(std::vector<Particles<mini_float>> &particles, double dt) -> 
 //! or reflect the particles which leave the domain
 //
 //! \param[in] Params & params - constant global simulation parameters
-//! \param[in] Patch & patch - current patch
+//! \param[in] std::vector<Particles<mini_float>> & particles - vector of species Particles
 // _____________________________________________________________________
 auto pushBC(Params &params, std::vector<Particles<mini_float>> &particles) -> void {
 
