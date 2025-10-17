@@ -1,4 +1,3 @@
-
 # miniPIC for CExA
 
 ## Presentation

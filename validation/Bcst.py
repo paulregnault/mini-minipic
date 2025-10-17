@@ -5,9 +5,12 @@
 # ______________________________________________________________________
 
 import os
+
 import numpy as np
+
 import lib.minipic_ci as minipic_ci
 import lib.minipic_diag as minipic_diag
+
 
 def validate(evaluate=True, threshold=1e-10):
 
@@ -21,7 +24,7 @@ def validate(evaluate=True, threshold=1e-10):
 
     # Create output file list
     for field in ["cloud_s00"]:
-        for it in range(0,number_of_iterations,1000):
+        for it in range(0, number_of_iterations, 1000):
 
             file = "{}_{:05d}.bin".format(field, it)
             output_file_list.append(file)
@@ -32,8 +35,8 @@ def validate(evaluate=True, threshold=1e-10):
 
     # Check that all output files exist
     for file in output_file_list:
-        if (not(os.path.exists("diags/"+file))):
-            raise ValueError('File {} not generated'.format(file))
+        if not (os.path.exists("diags/" + file)):
+            raise ValueError("File {} not generated".format(file))
 
     # ______________________________________________________________________
     # Check final scalar for species
@@ -49,14 +52,34 @@ def validate(evaluate=True, threshold=1e-10):
         particles = float(last_line[1])
         energy = float(last_line[2])
 
-    if (evaluate):
+    if evaluate:
 
-        if (reference_data[0] != iteration):
-            minipic_ci.error('Last iteration in species_00.txt is not correct'.format(iteration, reference_data[0]))
+        if reference_data[0] != iteration:
+            minipic_ci.error(
+                "Last iteration in species_00.txt is not correct".format(
+                    iteration, reference_data[0]
+                )
+            )
 
-        minipic_ci.evaluate(particles, reference_data[1], reference_data[1], '==', 'Number of particles in species_00.txt is not correct'.format(particles, reference_data[1]))
+        minipic_ci.evaluate(
+            particles,
+            reference_data[1],
+            reference_data[1],
+            "==",
+            "Number of particles in species_00.txt is not correct".format(
+                particles, reference_data[1]
+            ),
+        )
 
-        minipic_ci.evaluate(energy, reference_data[2], threshold, 'relative', 'Kinetic energy in species_00.txt is not correct'.format(energy, reference_data[2])) 
+        minipic_ci.evaluate(
+            energy,
+            reference_data[2],
+            threshold,
+            "relative",
+            "Kinetic energy in species_00.txt is not correct".format(
+                energy, reference_data[2]
+            ),
+        )
 
     else:
 
@@ -72,7 +95,7 @@ def validate(evaluate=True, threshold=1e-10):
     py_sum_ref = 127.28848117864518
     pz_sum_ref = 0.0
 
-    nb_files = int(number_of_iterations/1000)
+    nb_files = int(number_of_iterations / 1000)
 
     x_array = np.zeros(nb_files)
     y_array = np.zeros(nb_files)
@@ -82,11 +105,13 @@ def validate(evaluate=True, threshold=1e-10):
     py_array = np.zeros(nb_files)
     pz_array = np.zeros(nb_files)
 
-    for i,it in enumerate(range(0, number_of_iterations, 1000)):
+    for i, it in enumerate(range(0, number_of_iterations, 1000)):
 
         file = "cloud_s00_{:05d}.bin".format(it)
 
-        particle_number, id, w, x, y, z, px, py, pz = minipic_diag.read_particle_cloud("diags/"+file)
+        particle_number, id, w, x, y, z, px, py, pz = minipic_diag.read_particle_cloud(
+            "diags/" + file
+        )
 
         x_array[i] = x[0]
         y_array[i] = y[0]
@@ -104,15 +129,27 @@ def validate(evaluate=True, threshold=1e-10):
     py_sum = np.sum(np.abs(py_array))
     pz_sum = np.sum(np.abs(pz_array))
 
-    if (evaluate):
+    if evaluate:
 
-        minipic_ci.evaluate(x_sum, x_sum_ref, threshold, 'relative', 'Sum over x positions not similar')
-        minipic_ci.evaluate(y_sum, y_sum_ref, threshold, 'relative', 'Sum over y positions not similar')
-        minipic_ci.evaluate(z_sum, z_sum_ref, threshold, 'relative', 'Sum over z positions not similar')
+        minipic_ci.evaluate(
+            x_sum, x_sum_ref, threshold, "relative", "Sum over x positions not similar"
+        )
+        minipic_ci.evaluate(
+            y_sum, y_sum_ref, threshold, "relative", "Sum over y positions not similar"
+        )
+        minipic_ci.evaluate(
+            z_sum, z_sum_ref, threshold, "relative", "Sum over z positions not similar"
+        )
 
-        minipic_ci.evaluate(px_sum, px_sum_ref, threshold, 'relative', 'Sum over px not similar')
-        minipic_ci.evaluate(py_sum, py_sum_ref, threshold, 'relative', 'Sum over py not similar')
-        minipic_ci.evaluate(pz_sum, pz_sum_ref, threshold, 'absolute', 'Sum over pz not similar')
+        minipic_ci.evaluate(
+            px_sum, px_sum_ref, threshold, "relative", "Sum over px not similar"
+        )
+        minipic_ci.evaluate(
+            py_sum, py_sum_ref, threshold, "relative", "Sum over py not similar"
+        )
+        minipic_ci.evaluate(
+            pz_sum, pz_sum_ref, threshold, "absolute", "Sum over pz not similar"
+        )
 
     else:
 
@@ -123,4 +160,3 @@ def validate(evaluate=True, threshold=1e-10):
         print("px_sum_ref = {}".format(px_sum))
         print("py_sum_ref = {}".format(py_sum))
         print("pz_sum_ref = {}".format(pz_sum))
-    

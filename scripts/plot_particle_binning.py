@@ -4,31 +4,32 @@
 # __________________________________________________________
 
 
-#import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import matplotlib.animation as animation
-
+import argparse
+import os
 import struct
 import sys
-import os
 
-import argparse
+import matplotlib.animation as animation
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+# import pandas as pd
+import numpy as np
 
 import lib.minipic_diag
 
-path=""
+path = ""
 
 # Use argparse to parse arguments
 # -h for help
 # -f for file name
 # -c for colormap
 
-parser = argparse.ArgumentParser(description='Plot particle binning diag')
+parser = argparse.ArgumentParser(description="Plot particle binning diag")
 
-parser.add_argument('-f', '--file', type=str, help="Path toward the diag binning file")
-parser.add_argument('-c', '--colormap', type=str, help="colormap to use", default="plasma")
+parser.add_argument("-f", "--file", type=str, help="Path toward the diag binning file")
+parser.add_argument(
+    "-c", "--colormap", type=str, help="colormap to use", default="plasma"
+)
 
 args = parser.parse_args()
 
@@ -43,11 +44,11 @@ if not os.path.isfile(args.file):
 
 # Get the binning dimension
 
-dim = lib.minipic_diag.get_diag_dimension(args.file);
+dim = lib.minipic_diag.get_diag_dimension(args.file)
 
 print(" diag dimension : {}".format(dim))
 
-if (dim == 1):
+if dim == 1:
 
     # Read file 1D
     x_axis, x_min, x_max, x, data_name, data = lib.minipic_diag.read_1d_diag(args.file)
@@ -69,7 +70,7 @@ if (dim == 1):
     axs.set_xlabel(x_axis)
     axs.set_ylabel(data_name)
 
-elif (dim == 2):
+elif dim == 2:
 
     x_axis, x, y_axis, y, data_name, data_map = lib.minipic_diag.read_3d_diag(args.file)
 
@@ -92,22 +93,24 @@ elif (dim == 2):
     gs = gridspec.GridSpec(4, 4)
     axs = fig.add_subplot(gs[0:4, 0:4])
 
-    img=axs.pcolormesh(x, y, data_map[:,:].T, cmap=args.colormap)
+    img = axs.pcolormesh(x, y, data_map[:, :].T, cmap=args.colormap)
 
     axs.set_xlabel(x_axis)
     axs.set_ylabel(y_axis)
 
     fig.colorbar(img, ax=axs)
 
-    #axs.set_xscale("log")
-    #axs.set_yscale("log")
-    #axs.set_zscale("log")
+    # axs.set_xscale("log")
+    # axs.set_yscale("log")
+    # axs.set_zscale("log")
 
     fig.tight_layout()
 
-elif (dim == 3):
+elif dim == 3:
 
-    x_axis, x, y_axis, y, z_axis, z, data_name, data_map = lib.minipic_diag.read_3d_diag(args.file)
+    x_axis, x, y_axis, y, z_axis, z, data_name, data_map = (
+        lib.minipic_diag.read_3d_diag(args.file)
+    )
 
     print(" data name : {}".format(data_name))
     print(" x_axis : {}".format(x_axis))
@@ -135,16 +138,16 @@ elif (dim == 3):
     gs = gridspec.GridSpec(4, 4)
     axs = fig.add_subplot(gs[0:4, 0:4])
 
-    img=axs.pcolormesh(x, y, data_map[:,:,int(z_ncells/2)].T, cmap=args.colormap)
+    img = axs.pcolormesh(x, y, data_map[:, :, int(z_ncells / 2)].T, cmap=args.colormap)
 
     axs.set_xlabel(x_axis)
     axs.set_ylabel(y_axis)
 
     fig.colorbar(img, ax=axs)
 
-    #axs.set_xscale("log")
-    #axs.set_yscale("log")
-    #axs.set_zscale("log")
+    # axs.set_xscale("log")
+    # axs.set_yscale("log")
+    # axs.set_zscale("log")
 
     fig.tight_layout()
 

@@ -1,51 +1,68 @@
 import math
 
-def error(txt):
-    raise ValueError("\033[31m" + txt + "\033[39m") 
 
-def evaluate(value, reference, threshold, operator = "relative",  txt = ""):
+def error(txt):
+    raise ValueError("\033[31m" + txt + "\033[39m")
+
+
+def evaluate(value, reference, threshold, operator="relative", txt=""):
 
     flag = False
     error_value = 0
 
-    if (operator == "<"):
+    if operator == "<":
 
         error_value = math.fabs(value - threshold)
 
-        flag = (value > threshold)
+        flag = value > threshold
 
-        if (flag):
-            error(txt + ": {} > {} with error {}".format(value, threshold, error_value)) 
+        if flag:
+            error(txt + ": {} > {} with error {}".format(value, threshold, error_value))
 
-    elif (operator == "=="):
+    elif operator == "==":
 
         error_value = math.fabs(value - threshold)
 
-        flag = (error_value != 0)
+        flag = error_value != 0
 
-        if (flag):
-            error(txt + ": {} not equal to {} with error {}".format(value, threshold, error_value)) 
+        if flag:
+            error(
+                txt
+                + ": {} not equal to {} with error {}".format(
+                    value, threshold, error_value
+                )
+            )
 
-    elif (operator == "relative"):
+    elif operator == "relative":
 
-        if (reference == 0):
+        if reference == 0:
             error("Can not evaluate a relative error with reference == 0")
 
-        error_value = math.fabs((value - reference)/reference)
+        error_value = math.fabs((value - reference) / reference)
 
-        flag = (error_value > threshold)
+        flag = error_value > threshold
 
-        if (flag):
-            error(txt + ": {} vs {} with error {} for threshold {}".format(value, reference, error_value, threshold)) 
+        if flag:
+            error(
+                txt
+                + ": {} vs {} with error {} for threshold {}".format(
+                    value, reference, error_value, threshold
+                )
+            )
 
-    elif (operator == "absolute"):
+    elif operator == "absolute":
 
         error_value = math.fabs(value - reference)
 
-        flag = (error_value > threshold)
+        flag = error_value > threshold
 
-        if (flag):
-            error(txt + ": {} vs {} with error {} for threshold {}".format(value, reference, error_value, threshold)) 
+        if flag:
+            error(
+                txt
+                + ": {} vs {} with error {} for threshold {}".format(
+                    value, reference, error_value, threshold
+                )
+            )
 
     else:
 

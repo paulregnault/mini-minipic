@@ -13,6 +13,12 @@ miniPIC uses CMake as a build system. For using Kokkos, you have two options:
 git clone --recurse-submodules ...
 ```
 
+If you have cloned without the submodules:
+
+```sh
+git submodule update --init
+```
+
 ### Method 2: Using an installed Kokkos
 
 If you have Kokkos already installed, you need to tell CMake where to find it:
@@ -37,6 +43,14 @@ make
 <img title="Warning" alt="Warning" src="./images/warning.png" height="20"> Building in the root directory is not supported.
 
 <img title="Warning" alt="Warning" src="./images/warning.png" height="20"> By default, the code is compiled with Kokkos serial backend (sequential mode).
+
+### Python dependencies
+
+Python is used for testing and validation, and needs its own dependencies.
+
+```sh
+pip install --user -r requirements.txt
+```
 
 ## Options
 
