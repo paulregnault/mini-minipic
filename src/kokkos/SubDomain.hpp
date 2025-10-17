@@ -313,7 +313,7 @@ public:
       } // end if position_initialization_level_ == cell
 
       // Add single particles
-      for (int ip = 0; ip < params.particles_to_add_.size(); ++ip) {
+      for (size_t ip = 0; ip < params.particles_to_add_.size(); ++ip) {
         if (params.particles_to_add_[ip].is_ == is) {
 
           const double w = params.particles_to_add_[ip].weight_;

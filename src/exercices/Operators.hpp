@@ -300,51 +300,51 @@ auto push_momentum(std::vector<Particles<mini_float>> &particles, double dt) -> 
     vector_t Bzp = particles[is].Bz_.data_h_;
 
     for(int ip = 0; ip < n_particles; ++ip) {
-        // 1/2 E
-        mini_float px = qp * Exp(ip);
-        mini_float py = qp * Eyp(ip);
-        mini_float pz = qp * Ezp(ip);
+      // 1/2 E
+      mini_float px = qp * Exp(ip);
+      mini_float py = qp * Eyp(ip);
+      mini_float pz = qp * Ezp(ip);
 
-        const mini_float ux = mx(ip) + px;
-        const mini_float uy = my(ip) + py;
-        const mini_float uz = mz(ip) + pz;
+      const mini_float ux = mx(ip) + px;
+      const mini_float uy = my(ip) + py;
+      const mini_float uz = mz(ip) + pz;
 
-        // gamma-factor
-        mini_float usq       = (ux * ux + uy * uy + uz * uz);
-        mini_float gamma     = sqrt(1 + usq);
-        mini_float gamma_inv = qp / gamma;
+      // gamma-factor
+      mini_float usq       = (ux * ux + uy * uy + uz * uz);
+      mini_float gamma     = sqrt(1 + usq);
+      mini_float gamma_inv = qp / gamma;
 
-        // B, T = Transform to rotate the particle
-        const mini_float tx  = gamma_inv * Bxp(ip);
-        const mini_float ty  = gamma_inv * Byp(ip);
-        const mini_float tz  = gamma_inv * Bzp(ip);
-        const mini_float tsq = 1. + (tx * tx + ty * ty + tz * tz);
-        mini_float tsq_inv   = 1. / tsq;
+      // B, T = Transform to rotate the particle
+      const mini_float tx  = gamma_inv * Bxp(ip);
+      const mini_float ty  = gamma_inv * Byp(ip);
+      const mini_float tz  = gamma_inv * Bzp(ip);
+      const mini_float tsq = 1. + (tx * tx + ty * ty + tz * tz);
+      mini_float tsq_inv   = 1. / tsq;
 
-        px += ((1.0 + tx * tx - ty * ty - tz * tz) * ux + 2.0 * (tx * ty + tz) * uy +
-               2.0 * (tz * tx - ty) * uz) *
-              tsq_inv;
+      px += ((1.0 + tx * tx - ty * ty - tz * tz) * ux + 2.0 * (tx * ty + tz) * uy +
+              2.0 * (tz * tx - ty) * uz) *
+            tsq_inv;
 
-        py += (2.0 * (tx * ty - tz) * ux + (1.0 - tx * tx + ty * ty - tz * tz) * uy +
-               2.0 * (ty * tz + tx) * uz) *
-              tsq_inv;
+      py += (2.0 * (tx * ty - tz) * ux + (1.0 - tx * tx + ty * ty - tz * tz) * uy +
+              2.0 * (ty * tz + tx) * uz) *
+            tsq_inv;
 
-        pz += (2.0 * (tz * tx + ty) * ux + 2.0 * (ty * tz - tx) * uy +
-               (1.0 - tx * tx - ty * ty + tz * tz) * uz) *
-              tsq_inv;
+      pz += (2.0 * (tz * tx + ty) * ux + 2.0 * (ty * tz - tx) * uy +
+              (1.0 - tx * tx - ty * ty + tz * tz) * uz) *
+            tsq_inv;
 
-        // gamma-factor
-        usq   = (px * px + py * py + pz * pz);
-        gamma = sqrt(1 + usq);
+      // gamma-factor
+      usq   = (px * px + py * py + pz * pz);
+      gamma = sqrt(1 + usq);
 
-        // Update inverse gamma factor
-        gamma_inv = 1 / gamma;
+      // Update inverse gamma factor
+      gamma_inv = 1 / gamma;
 
-        // Update momentum
-        mx(ip) = px;
-        my(ip) = py;
-        mz(ip) = pz;
-      }
+      // Update momentum
+      mx(ip) = px;
+      my(ip) = py;
+      mz(ip) = pz;
+    } // end for particles
 
   } // end for species
 }

@@ -16,7 +16,7 @@
 #include "SubDomain.hpp"
 
 // Load a setup
-#include"thermal.hpp"
+#include"antenna.hpp"
 
 //! Main function
 int main(int argc, char *argv[]) {

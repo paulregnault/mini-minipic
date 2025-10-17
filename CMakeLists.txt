@@ -36,6 +36,7 @@ option(DEBUG "Debug messages" OFF)
 option(WARNING "Warning mode (ON/OFF)" OFF)
 option(TEST "Simulation test for CI" OFF)
 option(MINIPIC "Compile minipic (ON/OFF)" ON)
+option(UNIFIED_MEMORY "Use unified memory (ON/OFF)" OFF)
 
 message(" Minipic compilation: ${MINIPIC}")
 
@@ -61,6 +62,17 @@ if (WARNING)
  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 endif()
 
+# _________________________________________________________________
+# Unified memory
+
+if (UNIFIED_MEMORY)
+ message(" Unified memory: ON")
+ set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -D__MINIPIC_KOKKOS_UNIFIED__)
+else ()
+ message(" Unified memory: OFF")
+ set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -D__MINIPIC_KOKKOS_NON_UNIFIED__)
+endif ()
+
 # __________________________________________________________________
 # Determine languages
 
@@ -76,7 +88,6 @@ project (minipic LANGUAGES ${LANGUAGES})
 # Sources and compile options
 
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/exercices/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/common/*.cpp")
-set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -D__MINIPIC_KOKKOS__ -D__MINIPIC_KOKKOS_COMMON__ -D__MINIPIC_KOKKOS_NON_UNIFIED__)
 include_directories(src/setups src/common src/exercices)
 
 find_package(Kokkos QUIET)

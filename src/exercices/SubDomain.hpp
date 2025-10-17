@@ -515,11 +515,6 @@ public:
 
     DEBUG("  -> stop push");
 
-    em_.sync(minipic::host, minipic::device);
-    for (size_t is = 0; is < particles_m.size(); ++is) {
-      particles_m[is].sync(minipic::host, minipic::device);
-    }
-
     // Do boundary conditions on global domain
     DEBUG("  -> Patch 0: start pushBC");
 
@@ -527,12 +522,18 @@ public:
 
     DEBUG("  -> stop pushBC");
 
+    em_.sync(minipic::host, minipic::device);
+    for (size_t is = 0; is < particles_m.size(); ++is) {
+      particles_m[is].sync(minipic::host, minipic::device);
+    }
 
 #if defined(__MINIPIC_DEBUG__)
     // check particles
-    particles_m.check(inf_m[0], sup_m[0],
-                      inf_m[1], sup_m[1],
-                      inf_m[2], sup_m[2]);
+    for (size_t is = 0; is < particles_m.size(); ++is) {
+      particles_m[is].check(inf_m[0], sup_m[0],
+                            inf_m[1], sup_m[1],
+                            inf_m[2], sup_m[2]);
+    }
 #endif
 
     // Projection in local field

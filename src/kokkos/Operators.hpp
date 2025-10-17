@@ -25,7 +25,7 @@ auto interpolate(ElectroMagn &em, std::vector<Particles<mini_float>> &particles)
 
   // em.Ex_m.print();
 
-  for (int is = 0; is < particles.size(); is++) {
+  for (size_t is = 0; is < particles.size(); is++) {
 
     const int n_particles = particles[is].size();
 
@@ -276,7 +276,7 @@ auto push(std::vector<Particles<mini_float>> &particles, double dt) -> void {
         z(ip) += mz(ip) * dt * gamma_inv;
       });
 
-    particles[is].sync(minipic::host, minipic::device);
+    Kokkos::fence();
 
   } // Loop on species
 }
