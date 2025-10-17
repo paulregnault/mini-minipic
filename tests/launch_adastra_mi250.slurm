@@ -31,4 +31,4 @@ echo "Number of Cores/Task Allocated = $SLURM_CPUS_PER_TASK"
 # ________________________________________________________________________
 # Launch the test
 
-python run.py -g gpu --compiler="hipcc" --cmake-args="-DCMAKE_BUILD_TYPE=Release -DKokkos_ENABLE_HIP=ON -DKokkos_ARCH_AMD_GFX90A=ON"
+python run.py -g gpu-mi250

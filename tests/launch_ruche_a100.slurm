@@ -23,4 +23,4 @@ module load "cmake/3.21.4/gcc-13.2.0"
 # ________________________
 # Kokkos
 
-python run.py -g gpu
+python run.py -g gpu-a100

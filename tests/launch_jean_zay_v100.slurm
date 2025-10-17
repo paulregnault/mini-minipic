@@ -20,4 +20,4 @@ cd "$SLURM_SUBMIT_DIR"
 # ________________________
 # Kokkos
 
-python run.py -g gpu --cmake-args="-DCMAKE_BUILD_TYPE=Release -DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_VOLTA70=ON"
+python run.py -g gpu-v100

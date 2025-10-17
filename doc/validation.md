@@ -35,13 +35,17 @@ Here is a list of available options:
 
 ### Configurations
 
-Here is a list of possible configurations:
+Here is a list of all configurations:
 
-| Configuration | Description | Compiler | CMake Options | Run Prefix |
-| --- | --- | --- | --- | --- |
-| cpu | CPU benchmark | gcc | `-DCMAKE_VERBOSE_MAKEFILE=ON -DKokkos_ENABLE_OPENMP=ON` | `OMP_PROC_BIND=spread,OMP_NUM_THREADS=8` |
-| gpu | GPU benchmark on A100 | gcc | `-DCMAKE_VERBOSE_MAKEFILE=ON -DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_AMPERE80=ON` | |
-| gpu | GPU benchmark on V100 | gcc | `-DCMAKE_VERBOSE_MAKEFILE=ON -DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_VOLTA70=ON` | |
+| Configuration | Description |
+| --- | --- |
+| cpu-serial | CPU serial |
+| cpu-openmp | CPU with OpenMP, 8 threads |
+| gpu-v100 | GPU on V100 |
+| gpu-a100 | GPU on A100 |
+| gpu-h100 | GPU on H100 |
+| gpu-mi250 | GPU on MI250 |
+| gpu-mi300a | GPU on MI300A, with `HSA_XNACK` set |
 
 ### Usage examples
 

@@ -18,4 +18,4 @@ module load "cmake/3.21.4/gcc-13.2.0"
 # _________________________________________
 # Kokkos
 
-python run.py -g cpu
+python run.py -g cpu-openmp

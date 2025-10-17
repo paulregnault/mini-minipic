@@ -22,4 +22,4 @@ module load "cmake/3.21.4/gcc-13.2.0"
 # ________________________
 # Kokkos
 
-python run.py -g gpu --cmake-args="-DCMAKE_BUILD_TYPE=Release -DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_VOLTA70=ON"
+python run.py -g gpu-v100

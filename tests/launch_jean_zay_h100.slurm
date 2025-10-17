@@ -28,4 +28,4 @@ cd "$SLURM_SUBMIT_DIR"
 # ________________________________________________________________________
 # Launch the test
 
-python run.py -g gpu --cmake-args="-DCMAKE_BUILD_TYPE=Release -DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_HOPPER90=ON"
+python run.py -g gpu-h100

@@ -11,8 +11,6 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --gpus-per-node=1
 
-export HSA_XNACK=1
-
 set -x
 ulimit -c unlimited
 cd "${SLURM_SUBMIT_DIR}"
@@ -47,4 +45,4 @@ export LD_LIBRARY_PATH=$KOKKOS_HOME/lib:$LD_LIBRARY_PATH
 # ________________________________________________________________________
 # Launch the test
 
-python run.py -g gpu --compiler="hipcc" --cmake-args="-DCMAKE_BUILD_TYPE=Release -DKokkos_ENABLE_HIP=ON -DKokkos_ARCH_AMD_GFX942_API=ON"
+python run.py -g gpu-mi300a

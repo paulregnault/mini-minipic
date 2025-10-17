@@ -28,4 +28,4 @@ cd "$SLURM_SUBMIT_DIR"
 # ________________________________________________________________________
 # Launch the test
 
-python run.py -g gpu
+python run.py -g gpu-a100

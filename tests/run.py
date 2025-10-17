@@ -17,7 +17,19 @@ import time
 
 # Configurations for running the tests
 configuration_list = {
-    "cpu": {
+    "cpu-serial": {
+        "compiler": "g++",
+        "cmake": [
+            "-DCMAKE_VERBOSE_MAKEFILE=ON",
+            "-DCMAKE_BUILD_TYPE=Release",
+        ],
+        "env": {},
+        "prefix": [],
+        "exe_name": "minipic",
+        "benchmarks": ["thermal", "beam", "antenna"],
+        "args": [[], [], []],
+    },
+    "cpu-openmp": {
         "compiler": "g++",
         "cmake": [
             "-DCMAKE_VERBOSE_MAKEFILE=ON",
@@ -30,7 +42,21 @@ configuration_list = {
         "benchmarks": ["thermal", "beam", "antenna"],
         "args": [[], [], []],
     },
-    "gpu": {
+    "gpu-v100": {
+        "compiler": "g++",
+        "cmake": [
+            "-DCMAKE_VERBOSE_MAKEFILE=ON",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DKokkos_ENABLE_CUDA=ON",
+            "-DKokkos_ARCH_VOLTA70=ON",
+        ],
+        "env": {},
+        "prefix": [],
+        "exe_name": "minipic",
+        "benchmarks": ["thermal", "beam", "antenna"],
+        "args": [[], [], []],
+    },
+    "gpu-a100": {
         "compiler": "g++",
         "cmake": [
             "-DCMAKE_VERBOSE_MAKEFILE=ON",
@@ -39,6 +65,48 @@ configuration_list = {
             "-DKokkos_ARCH_AMPERE80=ON",
         ],
         "env": {},
+        "prefix": [],
+        "exe_name": "minipic",
+        "benchmarks": ["thermal", "beam", "antenna"],
+        "args": [[], [], []],
+    },
+    "gpu-h100": {
+        "compiler": "g++",
+        "cmake": [
+            "-DCMAKE_VERBOSE_MAKEFILE=ON",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DKokkos_ENABLE_CUDA=ON",
+            "-DKokkos_ARCH_HOPPER90=ON",
+        ],
+        "env": {},
+        "prefix": [],
+        "exe_name": "minipic",
+        "benchmarks": ["thermal", "beam", "antenna"],
+        "args": [[], [], []],
+    },
+    "gpu-mi250": {
+        "compiler": "hipcc",
+        "cmake": [
+            "-DCMAKE_VERBOSE_MAKEFILE=ON",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DKokkos_ENABLE_HIP=ON",
+            "-DKokkos_ARCH_AMD_GFX90A=ON",
+        ],
+        "env": {},
+        "prefix": [],
+        "exe_name": "minipic",
+        "benchmarks": ["thermal", "beam", "antenna"],
+        "args": [[], [], []],
+    },
+    "gpu-mi300a": {
+        "compiler": "hipcc",
+        "cmake": [
+            "-DCMAKE_VERBOSE_MAKEFILE=ON",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DKokkos_ENABLE_HIP=ON",
+            "-DKokkos_ARCH_AMD_GFX942=ON",
+        ],
+        "env": {"HSA_XNACK": "1"},
         "prefix": [],
         "exe_name": "minipic",
         "benchmarks": ["thermal", "beam", "antenna"],
@@ -65,8 +133,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "-g",
     "--config",
-    default="cpu",
-    help="configuration choice: cpu (default), gpu",
+    default="cpu-openmp",
+    help="configuration choice: {}, default to cpu-openmp".format(", ".join(configuration_list.keys())),
 )
 parser.add_argument("-c", "--compiler", help="custom compiler choice")
 parser.add_argument(
