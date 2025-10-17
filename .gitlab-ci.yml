@@ -14,7 +14,7 @@ variables:
 # Test Mini-PIC exercise using OpenMP for CPU on Ruche
 # _____________________________________________________________________________
 
-test_kokkos_omp:
+test_kokkos_omp_exercise:
   # only: *default_run
   tags:
     - ruche
@@ -23,9 +23,7 @@ test_kokkos_omp:
   before_script:
     - source ${WORKDIR}/gitlab-ci_runs/env/kokkos_omp_cpu_intel
   script:
-    - cp -r tests tests_kokkos_omp
-    - cd tests_kokkos_omp_exercise
-    - srun --time=00:20:00 --cpus-per-task=8 --ntasks=1 --partition=cpu_short python3 run.py -c icpx -g cpu-openmp --cmake-args-add "-DMINIPIC_IMPLEMENTATION=exercise"
+    - srun --time=00:20:00 --cpus-per-task=8 --ntasks=1 --partition=cpu_short python3 test/run.py -c icpx -g cpu-openmp --cmake-args-add="-DMINIPIC_IMPLEMENTATION=exercise" --build="build/omp_exercise"
 
 # _____________________________________________________________________________
 #
@@ -41,9 +39,7 @@ test_kokkos_omp:
   before_script:
     - source ${WORKDIR}/gitlab-ci_runs/env/kokkos_omp_cpu_intel
   script:
-    - cp -r tests tests_kokkos_omp
-    - cd tests_kokkos_omp
-    - srun --time=00:20:00 --cpus-per-task=8 --ntasks=1 --partition=cpu_short python3 run.py -c icpx -g cpu-openmp --cmake-args-add "-DMINIPIC_IMPLEMENTATION=kokkos"
+    - srun --time=00:20:00 --cpus-per-task=8 --ntasks=1 --partition=cpu_short python3 tests/run.py -c icpx -g cpu-openmp --cmake-args-add="-DMINIPIC_IMPLEMENTATION=kokkos" --build="build/omp"
 
 # _____________________________________________________________________________
 #
@@ -59,6 +55,4 @@ test_kokkos_gpu:
   before_script:
     - source $WORKDIR/gitlab-ci_runs/env/kokkos_a100
   script:
-    - cp -r tests tests_kokkos_gpu
-    - cd tests_kokkos_gpu
-    - srun --nodes=1 --time=00:15:00 -p gpua100 --gres=gpu:1 --exclude=$EXCLUDED_GPUS python3 run.py -c g++ -g gpu-a100 --cmake-args-add "-DMINIPIC_IMPLEMENTATION=kokkos"
+    - srun --nodes=1 --time=00:15:00 -p gpua100 --gres=gpu:1 --exclude=$EXCLUDED_GPUS python3 test/run.py -c g++ -g gpu-a100 --cmake-args-add="-DMINIPIC_IMPLEMENTATION=kokkos" --build="build/gpu"
