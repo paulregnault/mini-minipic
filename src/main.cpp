@@ -14,22 +14,7 @@
 
 #include "Params.hpp"
 #include "SubDomain.hpp"
-
-// Load a setup
-
-#if defined(__MINIPIC_SETUP_ANTENNA__)
-#include "antenna.hpp"
-#elif defined(__MINIPIC_SETUP_BCST__)
-#include "Bcst.hpp"
-#elif defined(__MINIPIC_SETUP_BEAM__)
-#include "beam.hpp"
-#elif defined(__MINIPIC_SETUP_ECST__)
-#include "Ecst.hpp"
-#elif defined(__MINIPIC_SETUP_THERMAL__)
-#include "thermal.hpp"
-#else
-#error "No valid setup provided"
-#endif
+#include "Setup.hpp"
 
 //! Main function
 int main(int argc, char *argv[]) {

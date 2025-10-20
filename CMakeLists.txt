@@ -36,8 +36,8 @@ option(MINIPIC_DEBUG "Debug messages" OFF)
 option(MINIPIC_WARNING "Warning mode" OFF)
 option(MINIPIC_BUILD "Compile minipic" ON)
 option(MINIPIC_UNIFIED_MEMORY "Use unified memory" OFF)
-set(MINIPIC_IMPLEMENTATION "exercise" CACHE STRING "Which implementation to use")
-set(MINIPIC_SETUP "antenna" CACHE STRING "Which setup to build and run with")
+set(MINIPIC_IMPLEMENTATION "exercise" CACHE STRING "Which implementation to use (must be an existing directory in src/)")
+set(MINIPIC_SETUP "antenna" CACHE STRING "Which setup to build and run with (must be the stem name of a valid .cpp file in src/setups/)")
 
 message(" Minipic compilation: ${MINIPIC_BUILD}")
 
@@ -62,7 +62,8 @@ message(" Unified memory: ${MINIPIC_UNIFIED_MEMORY}")
 # _________________________________________________________________
 # Implementation
 
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/${MINIPIC_IMPLEMENTATION}")
+set(IMPLEMENTATION_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/${MINIPIC_IMPLEMENTATION}")
+if(NOT EXISTS "${IMPLEMENTATION_DIRECTORY}")
   message(FATAL_ERROR "Cannot find implementation '${MINIPIC_IMPLEMENTATION}' in src/")
 endif()
 message(" Implementation: ${MINIPIC_IMPLEMENTATION}")
@@ -70,7 +71,10 @@ message(" Implementation: ${MINIPIC_IMPLEMENTATION}")
 # _________________________________________________________________
 # Setup
 
-string(TOUPPER "${MINIPIC_SETUP}" MINIPIC_SETUP_UPPER)
+set(SETUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/setups/${MINIPIC_SETUP}.cpp")
+if(NOT EXISTS "${SETUP_FILE}")
+    message(FATAL_ERROR "Cannot find setup file ${MINIPIC_SETUP}.cpp in src/setups/")
+endif()
 message(" Setup: ${MINIPIC_SETUP}")
 
 message(" __________________________________________________________________ \n")
@@ -107,6 +111,7 @@ if(MINIPIC_BUILD)
     minipic
     "src/common/Params.cpp"
     "src/common/Tools.cpp"
+    "${SETUP_FILE}"
     "src/main.cpp"
   )
   target_include_directories(
@@ -114,14 +119,13 @@ if(MINIPIC_BUILD)
     PUBLIC
       "src/setups"
       "src/common"
-      "src/${MINIPIC_IMPLEMENTATION}"
+      "${IMPLEMENTATION_DIRECTORY}"
   )
   target_compile_definitions(
     minipic
     PUBLIC
       $<$<BOOL:${MINIPIC_DEBUG}>:__MINIPIC_DEBUG__>
       $<$<BOOL:${MINIPIC_UNIFIED_MEMORY}>:__MINIPIC_KOKKOS_UNIFIED__>
-      __MINIPIC_SETUP_${MINIPIC_SETUP_UPPER}__
   )
   target_link_libraries(
     minipic
