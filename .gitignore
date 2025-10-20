@@ -25,3 +25,4 @@ bin/
 lib/
 man/
 pyvenv.cfg
+venv/
