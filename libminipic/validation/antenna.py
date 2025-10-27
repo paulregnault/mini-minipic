@@ -1,4 +1,4 @@
-"""Validation script for the `antenna` benchmark."""
+"""Validation script for the `antenna` setup."""
 
 import os
 

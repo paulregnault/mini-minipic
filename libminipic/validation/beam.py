@@ -1,4 +1,4 @@
-"""Validation script for the `beam` benchmark."""
+"""Validation script for the `beam` setup."""
 
 import os
 

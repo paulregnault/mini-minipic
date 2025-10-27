@@ -1,4 +1,4 @@
-"""Validation script for the `default` benchmark."""
+"""Validation script for the `default` setup."""
 
 import os
 

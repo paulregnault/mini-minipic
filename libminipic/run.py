@@ -27,7 +27,7 @@ configuration_list = {
         "env": {},
         "prefix": [],
         "exe_name": "minipic",
-        "benchmarks": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna"],
         "args": [[], [], []],
     },
     "cpu-openmp": {
@@ -39,7 +39,7 @@ configuration_list = {
         "env": {"OMP_PROC_BIND": "spread", "OMP_NUM_THREADS": "8"},
         "prefix": [],
         "exe_name": "minipic",
-        "benchmarks": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna"],
         "args": [[], [], []],
     },
     "gpu-v100": {
@@ -52,7 +52,7 @@ configuration_list = {
         "env": {},
         "prefix": [],
         "exe_name": "minipic",
-        "benchmarks": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna"],
         "args": [[], [], []],
     },
     "gpu-a100": {
@@ -65,7 +65,7 @@ configuration_list = {
         "env": {},
         "prefix": [],
         "exe_name": "minipic",
-        "benchmarks": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna"],
         "args": [[], [], []],
     },
     "gpu-h100": {
@@ -78,7 +78,7 @@ configuration_list = {
         "env": {},
         "prefix": [],
         "exe_name": "minipic",
-        "benchmarks": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna"],
         "args": [[], [], []],
     },
     "gpu-mi250": {
@@ -91,7 +91,7 @@ configuration_list = {
         "env": {},
         "prefix": [],
         "exe_name": "minipic",
-        "benchmarks": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna"],
         "args": [[], [], []],
     },
     "gpu-mi300a": {
@@ -104,7 +104,7 @@ configuration_list = {
         "env": {"HSA_XNACK": "1"},
         "prefix": [],
         "exe_name": "minipic",
-        "benchmarks": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna"],
         "args": [[], [], []],
     },
 }
@@ -143,10 +143,10 @@ def run():
     )
     parser.add_argument("-c", "--compiler", help="custom compiler choice")
     parser.add_argument(
-        "-b",
-        "--benchmarks",
+        "-s",
+        "--setups",
         help=(
-            "specific benchmark, you can specify several benchmarks with a coma, "
+            "specific setup, you can specify several setups with a coma, "
             'for instance "default,beam"'
         ),
         default=None,
@@ -229,13 +229,13 @@ def run():
     # Save timers
     save_timers = args.save_timers
 
-    # Select benchmark list
-    if args.benchmarks:
+    # Select setup list
+    if args.setups:
 
-        selected_config["benchmarks"] = []
+        selected_config["setups"] = []
 
-        for b in args.benchmarks.split(","):
-            selected_config["benchmarks"].append(b)
+        for b in args.setups.split(","):
+            selected_config["setups"].append(b)
 
     # Environment
     if args.env:
@@ -259,13 +259,13 @@ def run():
         else:
 
             selected_config["args"] = []
-            for i in range(len(selected_config["benchmarks"])):
+            for i in range(len(selected_config["setups"])):
                 selected_config["args"].append(args.arguments)
 
     else:
 
         selected_config["args"] = []
-        for i in range(len(selected_config["benchmarks"])):
+        for i in range(len(selected_config["setups"])):
             selected_config["args"].append("")
 
     # Set custom cmake arguments
@@ -355,11 +355,11 @@ def run():
 
     # print all benchamrks
 
-    print(" Benchmarks: ")
-    for ib, benchmark in enumerate(selected_config["benchmarks"]):
-        print("   - {} with args '{}'".format(benchmark, selected_config["args"][ib]))
+    print(" Setups: ")
+    for ib, setup in enumerate(selected_config["setups"]):
+        print("   - {} with args '{}'".format(setup, selected_config["args"][ib]))
 
-    # Run benchmarks
+    # Run setups
 
     # Get configuration
     compiler = selected_config["compiler"]
@@ -367,7 +367,7 @@ def run():
     executable_name = selected_config["exe_name"]
     implementation = args.implementation
 
-    for ib, benchmark in enumerate(selected_config["benchmarks"]):
+    for ib, setup in enumerate(selected_config["setups"]):
 
         env = selected_config["env"]
         prefix = selected_config["prefix"]
@@ -375,21 +375,21 @@ def run():
 
         # bench parameters
 
-        bench_dir = os.path.join(build_dir, benchmark)
+        bench_dir = os.path.join(build_dir, setup)
 
         print("")
         print_line(terminal_size)
-        print("\n >>> Benchmark `{}` \n".format(benchmark))
+        print("\n >>> Setup `{}` \n".format(setup))
 
         # ____________________________________________________________________________
         # Compilation
 
-        # Create a directory for this benchmark
+        # Create a directory for this setup
         if fresh:
             shutil.rmtree(bench_dir, ignore_errors=True)
         os.makedirs(bench_dir, exist_ok=True)
 
-        cmake_command = ["cmake", root_dir, "-DMINIPIC_SETUP={}".format(benchmark)]
+        cmake_command = ["cmake", root_dir, "-DMINIPIC_SETUP={}".format(setup)]
 
         # handle implementation
         if implementation:
@@ -453,7 +453,7 @@ def run():
             print("   -> Launch the validation process ")
             print("")
 
-            validate_setup(bench_dir, benchmark, threshold)
+            validate_setup(bench_dir, setup, threshold)
             print_line(terminal_size)
 
             # ____________________________________________________________________________
@@ -484,7 +484,7 @@ def run():
                 # if the file does not exist, create it
 
                 ci_file_name = os.path.join(
-                    build_dir, "ci_{}_{}_timers.json".format(benchmark, configuration)
+                    build_dir, "ci_{}_{}_timers.json".format(setup, configuration)
                 )
 
                 if not os.path.exists(ci_file_name):

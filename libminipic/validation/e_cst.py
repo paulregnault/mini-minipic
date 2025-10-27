@@ -1,4 +1,4 @@
-"""Validation script for the `Ecst` benchmark."""
+"""Validation script for the `Ecst` setup."""
 
 import os
 

@@ -69,7 +69,7 @@ Here is a list of the available options:
 | `-h` | `--help` | Show a help message and exit |
 | `-g CONFIG` | `--config CONFIG` | Configuration choice: cpu (default), gpu |
 | `-c COMPILER` | `--compiler COMPILER` | Custom compiler choice |
-| `-b BENCHMARKS` | `--benchmarks BENCHMARKS` | Specific benchmark, you can specify several benchmarks with a coma. For instance "default,beam" |
+| `-s SETUP ` | `--setups SETUPS` | Specific setup, you can specify several setups with a coma. For instance "default,beam" |
 | | `--build-dir` | Build directory to use, default to `build` |
 | | `--implementation` | Which implementation to use, default to `exercise` |
 | `-a ARGUMENTS` | `--arguments ARGUMENTS` | Default arguments |

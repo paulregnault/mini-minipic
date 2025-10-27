@@ -1,4 +1,4 @@
-"""Validation script for the `Bcst` benchmark."""
+"""Validation script for the `Bcst` setup."""
 
 import os
 
