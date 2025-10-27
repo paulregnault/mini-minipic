@@ -142,8 +142,8 @@ Here is a list of the available options:
 The possible setups are:
 
 - `antenna`
-- `bcst`
-- `ecst`
+- `b_cst`
+- `e_cst`
 - `beam`
 - `thermal`
 
