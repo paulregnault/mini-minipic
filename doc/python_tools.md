@@ -78,7 +78,7 @@ Here is a list of the available options:
 | | `--no-evaluate` | If used, do not evaluate against the reference |
 | | `--compile-only` | If used, only compile the tests |
 | | `--threshold THRESHOLD` | Threshold for the validation |
-| | `--save-timers` | Save the timers for each benchmark |
+| | `--save-timers` | Save the timers for each setup |
 | | `--env` | Custom environment variables for the execution |
 | | `--cmake-args` | Set CMake arguments |
 | | `--cmake-args-add` | Append custom CMake arguments |

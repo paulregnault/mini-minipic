@@ -184,7 +184,7 @@ def run():
         "--threshold", help="threshold for the validation", default=1e-10, type=float
     )
     parser.add_argument(
-        "--save-timers", help="save the timers for each benchmark", action="store_true"
+        "--save-timers", help="save the timers for each setup", action="store_true"
     )
     parser.add_argument(
         "--prefix",
@@ -259,13 +259,13 @@ def run():
         else:
 
             selected_config["args"] = []
-            for i in range(len(selected_config["setups"])):
+            for _ in range(len(selected_config["setups"])):
                 selected_config["args"].append(args.arguments)
 
     else:
 
         selected_config["args"] = []
-        for i in range(len(selected_config["setups"])):
+        for _ in range(len(selected_config["setups"])):
             selected_config["args"].append("")
 
     # Set custom cmake arguments
@@ -356,8 +356,8 @@ def run():
     # print all benchamrks
 
     print(" Setups: ")
-    for ib, setup in enumerate(selected_config["setups"]):
-        print("   - {} with args '{}'".format(setup, selected_config["args"][ib]))
+    for setup_id, setup in enumerate(selected_config["setups"]):
+        print("   - {} with args '{}'".format(setup, selected_config["args"][setup_id]))
 
     # Run setups
 
@@ -367,11 +367,11 @@ def run():
     executable_name = selected_config["exe_name"]
     implementation = args.implementation
 
-    for ib, setup in enumerate(selected_config["setups"]):
+    for setup_id, setup in enumerate(selected_config["setups"]):
 
         env = selected_config["env"]
         prefix = selected_config["prefix"]
-        args = selected_config["args"][ib]
+        args = selected_config["args"][setup_id]
 
         # bench parameters
 
@@ -469,19 +469,6 @@ def run():
                     raw_timers_dict = json.load(f)
 
                 pic_it_time = raw_timers_dict["final"]["main loop (no diags)"][0]
-
-                # Append the following information to the file ci_benchmark_timers.json
-                # {
-                #   [unique_id] : {
-                #      "date" : "yyyy_mm_dd_hh_mm_ss",
-                #      "branch" : branch,
-                #      "hash" : hash,
-                #      "pipeline_id" : pipeline_id,
-                #      "times" : {
-                #          [iteration] : pic_it_time
-                #      }
-                # }
-                # if the file does not exist, create it
 
                 ci_file_name = os.path.join(
                     build_dir, "ci_{}_{}_timers.json".format(setup, configuration)
