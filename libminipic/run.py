@@ -373,7 +373,7 @@ def run():
         print_step(f"Setup {setup}", level=0)
 
         # ____________________________________________________________________________
-        # Compilation
+        # Configuration
 
         # Create a directory for this setup
         if fresh:
@@ -392,13 +392,17 @@ def run():
 
         cmake_command.extend(cmake)
 
-        print_step("Compilation")
-
+        print_step("Configuration")
         print_command(cmake_command)
 
         subprocess.run(cmake_command, cwd=bench_dir, check=True)
 
+        # ____________________________________________________________________________
+        # Compilation
+
         make_command = ["cmake", "--build", bench_dir, "--parallel", "4"]
+
+        print_step("Compilation")
         print_command(make_command)
 
         subprocess.run(make_command, check=True)
