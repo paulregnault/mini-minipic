@@ -1,15 +1,11 @@
-# ______________________________________________________________________
-#
-# Validation script for the `Bcst` benchmark
-#
-# ______________________________________________________________________
+"""Validation script for the `Ecst` setup."""
 
 import os
 
 import numpy as np
 
-import lib.minipic_ci as minipic_ci
-import lib.minipic_diag as minipic_diag
+from libminipic import ci as minipic_ci
+from libminipic import diag as minipic_diag
 
 
 def validate(evaluate=True, threshold=1e-10):
@@ -41,7 +37,7 @@ def validate(evaluate=True, threshold=1e-10):
     # ______________________________________________________________________
     # Check final scalar for species
 
-    reference_data = [50000, 1.0, 0.003123105625616999]
+    reference_data = [50000, 1.0, 0.07602920573221358]
 
     with open("diags/species_00.txt", "r") as f:
         lines = f.readlines()
@@ -88,12 +84,12 @@ def validate(evaluate=True, threshold=1e-10):
     # ______________________________________________________________________
     # Check cloud files
 
-    x_sum_ref = 27.258704826095418
-    y_sum_ref = 25.45718322703324
-    z_sum_ref = 25.499999999999996
-    px_sum_ref = 126.92720347227889
-    py_sum_ref = 127.28848117864518
-    pz_sum_ref = 0.0
+    x_sum_ref = 24.411730435676887
+    y_sum_ref = 23.88234608876007
+    z_sum_ref = 23.05876871008283
+    px_sum_ref = 994.5565640860931
+    py_sum_ref = 198.9113128173085
+    pz_sum_ref = 1591.290502538468
 
     nb_files = int(number_of_iterations / 1000)
 
@@ -148,7 +144,7 @@ def validate(evaluate=True, threshold=1e-10):
             py_sum, py_sum_ref, threshold, "relative", "Sum over py not similar"
         )
         minipic_ci.evaluate(
-            pz_sum, pz_sum_ref, threshold, "absolute", "Sum over pz not similar"
+            pz_sum, pz_sum_ref, threshold, "relative", "Sum over pz not similar"
         )
 
     else:

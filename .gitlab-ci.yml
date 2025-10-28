@@ -11,7 +11,24 @@ variables:
 
 # _____________________________________________________________________________
 #
-# Test Mini-PIC using Kokkos OpenMP for CPU on Ruche
+# Test Mini-PIC exercise using OpenMP for CPU on Ruche
+# _____________________________________________________________________________
+
+test_exercise_serial:
+  # only: *default_run
+  tags:
+    - ruche
+  stage: test
+  # needs: [ test_omp ]
+  before_script:
+    - source ${WORKDIR}/gitlab/runners/minipic_cexa/envs/omp.sh
+    - pip install .
+  script:
+    - srun --time=00:20:00 --cpus-per-task=4 --ntasks=1 --partition=cpu_short mini-run -c icpx -g cpu-serial --implementation exercise --build="build/exercise"
+
+# _____________________________________________________________________________
+#
+# Test Mini-PIC kokkos using OpenMP for CPU on Ruche
 # _____________________________________________________________________________
 
 test_kokkos_omp:
@@ -21,15 +38,14 @@ test_kokkos_omp:
   stage: test
   # needs: [ test_omp ]
   before_script:
-    - source ${WORKDIR}/gitlab-ci_runs/env/kokkos_omp_cpu_intel
+    - source ${WORKDIR}/gitlab/runners/minipic_cexa/envs/omp.sh
+    - pip install .
   script:
-    - cp -r tests tests_kokkos_omp
-    - cd tests_kokkos_omp
-    - srun --time=00:20:00 --cpus-per-task=8 --ntasks=1 --partition=cpu_short python3 run.py -c icpx -g kokkos  # --save-timers
+    - srun --time=00:20:00 --cpus-per-task=8 --ntasks=1 --partition=cpu_short mini-run -c icpx -g cpu-openmp --implementation kokkos --build="build/kokkos/omp"
 
 # _____________________________________________________________________________
 #
-# Test Mini-PIC using Kokkos for V100 or A100 GPU on Ruche
+# Test Mini-PIC kokkos on A100 GPU on Ruche
 # _____________________________________________________________________________
 
 test_kokkos_gpu:
@@ -39,20 +55,7 @@ test_kokkos_gpu:
   stage: test
   # needs: [ test_kokkos_omp ]
   before_script:
-    - source $WORKDIR/gitlab-ci_runs/env/kokkos_a100
+    - source ${WORKDIR}/gitlab/runners/minipic_cexa/envs/a100.sh
+    - pip install .
   script:
-    - cp -r tests tests_kokkos_gpu
-    - cd tests_kokkos_gpu
-    - srun --nodes=1 --time=00:15:00 -p gpua100 --gres=gpu:1 --exclude=$EXCLUDED_GPUS python3 run.py -c g++ -g kokkos_gpu  # --save-timers
-  
-
-
-
-      
-
-
-
-
-    
-
-
+    - srun --nodes=1 --time=00:15:00 -p gpua100 --gres=gpu:1 --exclude=$EXCLUDED_GPUS mini-run -c g++ -g gpu-a100 --implementation kokkos --build="build/kokkos/gpu"

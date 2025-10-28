@@ -2,7 +2,7 @@
 
 Input parameters to run a miniPIC simulation must be provided before compiling via a specific header containing the `setup` function. the setup function then is used to initiate global parameters in the `Params` class.
 
-A list of benchmarks can be found in the directory `src/setups/`.
+A list of setups can be found in the directory `src/setups/`.
 
 ## List of parameters
 

@@ -14,9 +14,7 @@
 
 #include "Params.hpp"
 #include "SubDomain.hpp"
-
-// Load a setup
-#include"antenna.hpp"
+#include "Setup.hpp"
 
 //! Main function
 int main(int argc, char *argv[]) {

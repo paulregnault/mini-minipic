@@ -11,15 +11,15 @@ message(" CMakeList for Mini-PIC")
 message(" __________________________________________________________________ \n")
 
 # Disable in-source builds to prevent source tree corruption.
-if( "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}" )
- message( FATAL_ERROR "FATAL: In-source builds are not allowed. You should create a separate directory for build files and delete CMakeCache.txt." )
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+ message( FATAL_ERROR "In-source builds are not allowed. You should create a separate directory for build files and delete CMakeCache.txt." )
 endif()
 
 # __________________________________________________________________
 # Options
 
 # Debug, Release, RelWithDebInfo and MinSizeRel
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
  set(
     CMAKE_BUILD_TYPE
     "RelWithDebInfo"
@@ -32,63 +32,60 @@ endif()
 message(" Build type: ${CMAKE_BUILD_TYPE}")
 
 # Debug and test modes
-option(DEBUG "Debug messages" OFF)
-option(WARNING "Warning mode (ON/OFF)" OFF)
-option(TEST "Simulation test for CI" OFF)
-option(MINIPIC "Compile minipic (ON/OFF)" ON)
-option(UNIFIED_MEMORY "Use unified memory (ON/OFF)" OFF)
-
-message(" Minipic compilation: ${MINIPIC}")
-
-set(EXE_NAME "minipic")
-message(" Executable name: ${EXE_NAME}")
-
-set(COMPILE_OPTIONS "")
-set(LINK_OPTIONS "")
+option(MINIPIC_DEBUG "Debug messages" OFF)
+option(MINIPIC_WARNING "Warning mode" OFF)
+option(MINIPIC_UNIFIED_MEMORY "Use unified memory" OFF)
+set(MINIPIC_IMPLEMENTATION "exercise" CACHE STRING "Which implementation to use (must be an existing directory in src/)")
+set(MINIPIC_SETUP "antenna" CACHE STRING "Which setup to build and run with (must be the stem name of a valid .cpp file in src/setups/)")
 
 # _________________________________________________________________
 # Debug mode
 
-if (DEBUG)
- message(" Debug mode: ON")
- set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -D__MINIPIC_DEBUG__)
-endif()
+message(" Debug mode: ${MINIPIC_DEBUG}")
 
 # _________________________________________________________________
 # Warning mode
 
-if (WARNING)
- message(" Warning mode: ON")
+if(MINIPIC_WARNING)
  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 endif()
+message(" Warning mode: ${MINIPIC_WARNING}")
 
 # _________________________________________________________________
 # Unified memory
 
-if (UNIFIED_MEMORY)
- message(" Unified memory: ON")
- set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -D__MINIPIC_KOKKOS_UNIFIED__)
-else ()
- message(" Unified memory: OFF")
- set(COMPILE_OPTIONS ${COMPILE_OPTIONS} -D__MINIPIC_KOKKOS_NON_UNIFIED__)
-endif ()
+message(" Unified memory: ${MINIPIC_UNIFIED_MEMORY}")
 
-# __________________________________________________________________
-# Determine languages
+# _________________________________________________________________
+# Implementation
 
-set(LANGUAGES CXX)
+set(IMPLEMENTATION_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/${MINIPIC_IMPLEMENTATION}")
+if(NOT EXISTS "${IMPLEMENTATION_DIRECTORY}")
+  message(FATAL_ERROR "Cannot find implementation '${MINIPIC_IMPLEMENTATION}' in src/")
+endif()
+message(" Implementation: ${MINIPIC_IMPLEMENTATION}")
 
-message(" Languages: ${LANGUAGES}")
+# _________________________________________________________________
+# Setup
+
+set(SETUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/setups/${MINIPIC_SETUP}.cpp")
+if(NOT EXISTS "${SETUP_FILE}")
+    message(FATAL_ERROR "Cannot find setup file ${MINIPIC_SETUP}.cpp in src/setups/")
+endif()
+message(" Setup: ${MINIPIC_SETUP}")
 
 message(" __________________________________________________________________ \n")
 
-project (minipic LANGUAGES ${LANGUAGES})
+# __________________________________________________________________
+# Project
+
+project(
+  minipic
+  LANGUAGES CXX
+)
 
 # __________________________________________________________________
-# Sources and compile options
-
-file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/exercices/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/common/*.cpp")
-include_directories(src/setups src/common src/exercices)
+# Dependencies
 
 find_package(Kokkos QUIET)
 if(Kokkos_FOUND)
@@ -97,32 +94,37 @@ if(Kokkos_FOUND)
   message(STATUS "  With options: ${Kokkos_OPTIONS}")
   message(STATUS "  For architectures: ${Kokkos_ARCH}")
 elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/kokkos/CMakeLists.txt")
-    message(STATUS "Kokkos submodule found. Using the submodule.")
-    add_subdirectory(external/kokkos)
+  message(STATUS "Kokkos submodule found. Using the submodule.")
+  add_subdirectory(external/kokkos)
 else()
-    message(WARNING "Kokkos not found. Try running: git submodule update --init --recursive")
-endif()
-
-# __________________________________________________________________
-
-message("${CMAKE_CURRENT_SOURCE_DIR}")
-message("${CMAKE_SOURCE_DIR}")
-
-# Specific behavior for test mode
-if (TEST)
-  set(MAIN_PATH "./main.cpp")
-else()
- set(MAIN_PATH "./src/main.cpp")
+  message(FATAL_ERROR "Kokkos not found. Try running: git submodule update --init --recursive")
 endif()
 
 # __________________________________________________________________
 # Create executable with options
 
-if (MINIPIC)
-
-  add_executable(${EXE_NAME} ${SOURCES} ${MAIN_PATH})
-  target_compile_options(${EXE_NAME} PRIVATE ${COMPILE_OPTIONS})
-  target_link_options(${EXE_NAME} PRIVATE ${LINK_OPTIONS})
-  target_link_libraries(${EXE_NAME} PRIVATE Kokkos::kokkos)
-
-endif()
+add_executable(
+  minipic
+  "src/common/Params.cpp"
+  "src/common/Tools.cpp"
+  "${SETUP_FILE}"
+  "src/main.cpp"
+)
+target_include_directories(
+  minipic
+  PUBLIC
+    "src/setups"
+    "src/common"
+    "${IMPLEMENTATION_DIRECTORY}"
+)
+target_compile_definitions(
+  minipic
+  PUBLIC
+    $<$<BOOL:${MINIPIC_DEBUG}>:__MINIPIC_DEBUG__>
+    $<$<BOOL:${MINIPIC_UNIFIED_MEMORY}>:__MINIPIC_KOKKOS_UNIFIED__>
+)
+target_link_libraries(
+  minipic
+  PRIVATE
+    Kokkos::kokkos
+)

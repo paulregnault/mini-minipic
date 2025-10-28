@@ -4,7 +4,7 @@
 
 /* _____________________________________________________________________ */
 
-#include "Params.hpp"
+#include "Setup.hpp"
 
 //! \brief Functiun to setup all input parameters
 void setup(Params &params) {
