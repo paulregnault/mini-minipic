@@ -12,6 +12,8 @@ from libminipic.exceptions import IncorrectFileMiniPICError, MissingFileMiniPICE
 
 CMAKE_CACHE_FILENAME = "CMakeCache.txt"
 
+THRESHOLD = 1e-10
+
 
 def detect_setup(path: Path) -> str:
     cmake_cache_file = path / CMAKE_CACHE_FILENAME
@@ -28,7 +30,7 @@ def detect_setup(path: Path) -> str:
     return matcher[0].strip()
 
 
-def validate_setup(path, setup=None, threshold=1e-10):
+def validate_setup(path, setup=None, threshold=THRESHOLD):
     if not setup:
         setup = detect_setup(path)
         print(f"Autodetected setup: {setup}")
@@ -59,7 +61,10 @@ def validate():
         default=Path.cwd(),
     )
     parser.add_argument(
-        "--threshold", help="threshold for the validation", default=1e-10, type=float
+        "--threshold",
+        help="threshold for the validation",
+        default=THRESHOLD,
+        type=float,
     )
 
     args = parser.parse_args()

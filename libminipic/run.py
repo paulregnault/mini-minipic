@@ -12,7 +12,7 @@ import sys
 import time
 
 from libminipic.ci import print_command, print_step
-from libminipic.validate import validate_setup
+from libminipic.validate import THRESHOLD, validate_setup
 
 # ________________________________________________________________________________
 # Parameters
@@ -176,7 +176,10 @@ def run():
         "--compile-only", help="if used, only compile the tests", action="store_true"
     )
     parser.add_argument(
-        "--threshold", help="threshold for the validation", default=1e-10, type=float
+        "--threshold",
+        help="threshold for the validation",
+        default=THRESHOLD,
+        type=float,
     )
     parser.add_argument(
         "--save-timers", help="save the timers for each setup", action="store_true"
