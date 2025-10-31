@@ -12,7 +12,6 @@
 
 set -e
 
-# ________________________________________________________________________
 # Modules
 
 module purge
@@ -21,7 +20,10 @@ module load nvidia-compilers/24.7
 module load cmake/3.31.4
 module load python
 
-# ________________________________________________________________________
+# Python env
+
+source ./venv/bin/activate
+
 # Launch the test
 
 mini-run -g gpu-h100

@@ -13,15 +13,18 @@
 
 set -e
 
-# ________________________________________________________________________
 # Modules
 
 module purge
 module load "gcc/13.2.0/gcc-4.8.5"
 module load "cuda/12.8.0/gcc-13.2.0"
 module load "cmake/3.21.4/gcc-13.2.0"
+module load "python-nospack/3.12.4/gcc-11.2.0"
 
-# ________________________________________________________________________
+# Python env
+
+source ./venv/bin/activate
+
 # Launch the test
 
 mini-run -g gpu-a100

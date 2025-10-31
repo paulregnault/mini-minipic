@@ -12,7 +12,6 @@
 
 set -e
 
-# ________________________________________________________________________
 # Modules
 
 module purge
@@ -23,7 +22,10 @@ module load amd-mixed
 module load cmake
 module load python
 
-# ________________________________________________________________________
+# Python env
+
+source ./venv/bin/activate
+
 # Launch the test
 
 mini-run -g gpu-mi250
