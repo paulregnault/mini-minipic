@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import time
+import shlex
 
 from libminipic.validate import validate_setup
 
@@ -271,11 +272,11 @@ def run():
     # Set custom cmake arguments
     if args.cmake_args:
 
-        selected_config["cmake"] = args.cmake_args.split()
+        selected_config["cmake"] = shlex.split(args.cmake_args)
 
     # Add custom cmake arguments
     if args.cmake_args_add:
-        selected_config["cmake"].extend(args.cmake_args_add.split())
+        selected_config["cmake"].extend(shlex.split(args.cmake_args_add))
 
     # threshold
     threshold = args.threshold
