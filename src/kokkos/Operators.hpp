@@ -526,7 +526,7 @@ void project(Params &params, ElectroMagn &em, std::vector<Particles> &particles)
   ElectroMagn::view_t Jy_device = em.Jy_m;
   ElectroMagn::view_t Jz_device = em.Jz_m;
 
-#if defined(MINIPIC_KOKKOS_SCATTERVIEW)
+#if defined(MINIPIC_KOKKOS_SCATTER_VIEW)
   // Use ScatterView
   Kokkos::Experimental::ScatterView<double ***> scatter_Jx(Jx_device);
   Kokkos::Experimental::ScatterView<double ***> scatter_Jy(Jy_device);
@@ -572,7 +572,7 @@ void project(Params &params, ElectroMagn &em, std::vector<Particles> &particles)
     Kokkos::parallel_for(
       n_particles,
       KOKKOS_LAMBDA(const int part) {
-#if defined(MINIPIC_KOKKOS_SCATTERVIEW)
+#if defined(MINIPIC_KOKKOS_SCATTER_VIEW)
         auto Jx = scatter_Jx.access();
         auto Jy = scatter_Jy.access();
         auto Jz = scatter_Jz.access();
@@ -661,7 +661,7 @@ void project(Params &params, ElectroMagn &em, std::vector<Particles> &particles)
     );  // end for each particles
 
     Kokkos::fence();
-#if defined(MINIPIC_KOKKOS_SCATTERVIEW)
+#if defined(MINIPIC_KOKKOS_SCATTER_VIEW)
     Kokkos::Experimental::contribute(Jx_device, scatter_Jx);
     Kokkos::Experimental::contribute(Jy_device, scatter_Jy);
     Kokkos::Experimental::contribute(Jz_device, scatter_Jz);
