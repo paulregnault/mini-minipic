@@ -39,7 +39,7 @@ Even better, you can use a virtual environment.
 ```sh
 pip install --user virtualenv
 virtualenv --python python<x.y> $PWD/venv
-source venv/activate
+source venv/bin/activate
 pip install .
 ```
 
@@ -70,8 +70,8 @@ Here is a list of the available options:
 | `-g CONFIG` | `--config CONFIG` | Configuration choice: cpu (default), gpu |
 | `-c COMPILER` | `--compiler COMPILER` | Custom compiler choice |
 | `-s SETUP ` | `--setups SETUPS` | Specific setup, you can specify several setups with a coma. For instance "default,beam" |
-| | `--build-dir` | Build directory to use, default to `build` |
-| | `--implementation` | Which implementation to use, default to `exercise` |
+| | `--build-dir DIR` | Build directory to use, default to `build` |
+| | `--implementation IMPLEMENTATION` | Which implementation to use, default to `exercise` |
 | `-a ARGUMENTS` | `--arguments ARGUMENTS` | Default arguments |
 | | `--fresh` | Whether to delete or not already existing files (clean before build) |
 | | `--clean` | Whether to delete or not the generated files (clean after run) |
@@ -79,9 +79,9 @@ Here is a list of the available options:
 | | `--compile-only` | If used, only compile the tests |
 | | `--threshold THRESHOLD` | Threshold for the validation |
 | | `--save-timers` | Save the timers for each setup |
-| | `--env` | Custom environment variables for the execution |
-| | `--cmake-args` | Set CMake arguments |
-| | `--cmake-args-add` | Append custom CMake arguments |
+| | `--env VAR1=VAL1,VAR2=VAL2` | Custom environment variables for the execution, separated by commas |
+| | `--cmake-args="-DARG1=VAL1 -DARG2=VAL2"` | Set CMake arguments; beware to separate the option and the value by `=` and not a space, as the leading dash would be misinterpreted; values separated by a space |
+| | `--cmake-args-add="-DARG1=VAL1 -DARG2=VAL2"` | Append custom CMake arguments; beware to separate the option and the value by `=` and not a space, as the leading dash would be misinterpreted; values separated by a space |
 
 ### Configurations
 
@@ -116,6 +116,21 @@ mini-run -g gpu
 ```bash
 mini-run -c clang++
 ```
+
+#### Specific implementation
+
+```bash
+mini-run --implementation kokkos
+```
+
+#### Specific CMake options
+
+```sh
+mini-run --cmake-args="-DCMAKE_BUILD_TYPE=Release -DKokkos_ROOT=$KOKKOS_ROOT"
+mini-run --cmake-args-add="-DKokkos_ROOT=$KOKKOS_ROOT"
+```
+
+Note the `=`, as with a space the argument parser would treat the option and the value as two different options.
 
 ## `mini-validate` command
 

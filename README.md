@@ -7,80 +7,58 @@ miniPIC is a playground for computer science and HPC experiments applied to the 
 > [!WARNING]
 > miniPIC is not a code intended to be used for numerical simulation of physical cases.
 
-### CPU backends
+## Directions
 
-<table>
-    <tr>
-        <th></th>
-        <th style="background-color: #CDD8E0; color: black">Internal Backend</th>
-        <th style="background-color: #CDD8E0; color: black">Intel CPU</th>
-        <th style="background-color: #CDD8E0; color: black">AMD CPU</th>
-        <th style="background-color: #CDD8E0; color: black">ARM based CPU</th>
-    </tr>
-    <tr>
-        <td>OpenMP loop</td>
-        <td></td>
-        <td style="background-color: #B1E0CB">LLVM, GCC, OneAPI</td>
-        <td style="background-color: #B1E0CB">LLVM, GCC, OneAPI</td>
-        <td style="background-color: #B1E0CB">LLVM 14, GCC 10</td>
-    </tr>
-    <tr>
-        <td>Kokkos</td>
-        <td>OpenMP</td>
-        <td style="background-color: #B1E0CB">LLVM, GCC, OneAPI</td>
-        <td style="background-color: #E0B4B2">Not tested</td>
-        <td style="background-color: #B1E0CB">LLVM, GCC</td>
-    </tr>
-</table>
+You have in this repo a realistic PIC solver which is at the beginning of being ported to Kokkos.
+The goal of the hakathon is to finish this port, and to optimize it for GPU architectures.
 
-### GPU backends
+Kokkos data containers, program structures, and command line management are already implemented in `src/common` files, you should not have to modify them.
+Cases, also known as setups, are hard-coded in `src/setups` and selected at compile time, you should not have to modify them either (at least for porting).
+Your work will essentially take place in the `src/exercise` directory, in two files of different granularity.
+The operators file is where most operators remain to be ported to Kokkos, whereas the subdomain file is the main time loop, that calls the aforementioned operators.
 
-<table>
-    <tr>
-        <th></th>
-        <th style="background-color: #CDD8E0; color: black">Internal Backend</th>
-        <th style="background-color: #CDD8E0; color: black">NVIDIA GPU</th>
-        <th style="background-color: #CDD8E0; color: black">AMD GPU</th>
-        <th style="background-color: #CDD8E0; color: black">Intel GPU</th>
-    </tr>
-    <tr>
-        <td>Kokkos</td>
-        <td>CUDA, HIP, SYCL</td>
-        <td style="background-color: #B1E0CB">CUDA 12 (tested on V100, A100, H100, GH200)</td>
-        <td style="background-color: #B1E0CB">HIP (tested on MI250, MI300)</td>
-        <td style="background-color: #B1E0CB">Tested on Intel MAX 1550</td>
-    </tr>
+If you want to skip the porting part, you can directly start from the `src/kokkos` code.
 
+<details>
 
-</table>
+<summary>Some pointers if needed</summary>
+
+[![pointers](https://imgs.xkcd.com/comics/pointers.png) "XKCD"](https://xkcd.com/138/)
+
+- Start by reading the doc!
+- You should first finish to port the operators in `src/exercise`;
+- You should port one operator at a time, and running `mini-run` to check if the program is still valid;
+- You may have to take care of data location in the process;
+- When it's done, you should focus on optimization;
+- You should use [Kokkos-tools](https://github.com/kokkos/kokkos-tools) to create regions and breakdown the time spent in the solver;
+- [Nsight Systems](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) may be useful to visualize the regions;
+- [Nsight Compute](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html) may be useful to analyze a specific region.
+- You should identify a bottleneck, try optimization strategies, and measure the gain, rinse and repeat (APOD method: Assess, Parallelize, Optimize, and Deploy).
+
+</details>
 
 ## Repository structure
 
-- `doc`: documentation pages
-- `src`: C++ sources
-  - `setups`: headers used to initialize the physical parameters
-  - `common`: source files common to all backends
-  - implementation specific folder (`kokkos`, `exercise`, etc)
-    - `Operators.hpp`: Operator functions
-    - `SubDomain.hpp`: Operator calls in the time loop
-- `libminipic`: Python libraries for miniPIC Python tools and validation scripts
-- `script`: Python scripts to read and plot diags
-- `slurm`: Slurm scripts for various supercomputers
-- `external`: Git submodules location
+- `doc`: documentation pages;
+- `src`: C++ sources:
+  - `setups`: headers used to initialize the physical parameters;
+  - `common`: source files common to all backends;
+  - implementation specific folder (`kokkos`, `exercise`, etc.):
+    - `Operators.hpp`: Operator functions;
+    - `SubDomain.hpp`: Time loop that calls above operator;
+- `libminipic`: Python libraries for miniPIC Python tools and validation scripts:
+- `script`: Python scripts to read and plot diags (requires `libminipic`);
+- `slurm`: Slurm scripts for various supercomputers;
+- `external`: Git submodules location.
 
+## Documentation for the exercise
 
-## How to use miniPIC
-
+- [Code structure](./doc/code_structure.md)
 - [Compilation](./doc/compilation.md)
-- [Understand and create your own setups](./doc/setups.md)
+- [Setups and how to create them](./doc/setups.md)
+- [Python tools for validation](./doc/python_tools.md)
 - [plot diags](./doc/diags.md)
 - [Timers](./doc/timers.md)
-- [Python tools](./doc/python_tools.md)
-
-## How to contribute
-
-- [Continuous Integration](./doc/ci.md)
-- [Code structure](./doc/code_structure.md)
 
 ## Publications
 

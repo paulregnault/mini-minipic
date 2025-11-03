@@ -12,16 +12,21 @@
 
 set -e
 
-# ________________________________________________________________________
 # Modules
 
 module purge
-module load arch/h100
-module load nvidia-compilers/24.7
-module load cmake/3.31.4
-module load python
+module load "arch/h100"
+module load "nvidia-compilers/24.7"
+module load "cmake/3.31.4"
+module load "python/3.12.2"
 
-# ________________________________________________________________________
+# Python env
+
+if [[ -d ./venv ]]
+then
+    source ./venv/bin/activate
+fi
+
 # Launch the test
 
 mini-run -g gpu-h100

@@ -12,18 +12,24 @@
 
 set -e
 
-# ________________________________________________________________________
 # Modules
 
 module purge
-module load cpe/24.07
-module load craype-accel-amd-gfx942 craype-x86-genoa
-module load PrgEnv-cray
-module load amd-mixed
-module load cmake
-module load python
+module load "cpe/24.07"
+module load "craype-accel-amd-gfx942"
+module load "craype-x86-genoa"
+module load "PrgEnv-cray"
+module load "amd-mixed"
+module load "cmake/3.27.9"
+module load "cray-python/3.11.7"
 
-# ________________________________________________________________________
+# Python env
+
+if [[ -d ./venv ]]
+then
+    source ./venv/bin/activate
+fi
+
 # Launch the test
 
 mini-run -g gpu-mi300a

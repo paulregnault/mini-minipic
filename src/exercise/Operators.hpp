@@ -8,6 +8,11 @@
 #ifndef OPERATORS_H
 #define OPERATORS_H
 
+#include "ElectroMagn.hpp"
+#include "Headers.hpp"
+#include "Particles.hpp"
+#include <Kokkos_Core.hpp>
+
 namespace operators {
 
 // Returns the sum of all elements of a View on the host

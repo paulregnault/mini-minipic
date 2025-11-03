@@ -52,7 +52,7 @@ CMake generic options:
 Project specific options:
 
 - `-DMINIPIC_DEBUG=<ON/OFF>`: enable/disable debug messages (`OFF` by default);
-- `-DMINIPIC_WARNING=<ON/OFF>`: enable/disable compiler warnings (`OFF` by default);
+- `-DMINIPIC_WARNING=<ON/OFF>`: enable/disable compiler warnings (add `-Wall`, `-Wextra`, and `-Wpedantic`, `OFF` by default);
 - `-DMINIPIC_UNIFIED_MEMORY=<ON/OFF>`: enable/disable unified memory views (`OFF` by default);
 - `-DMINIPIC_IMPLEMENTATION=<implementation>`: which implementation to use (`exercise` or `kokkos`, default to the former);
 - `-DMINIPIC_SETUP=<setup>`: which setup to build and run with (`antenna`, `b_cst`, `beam`, `e_cst`, `thermal`, default to the former).
