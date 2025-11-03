@@ -526,7 +526,7 @@ public:
       particles_m[is].sync(minipic::host, minipic::device);
     }
 
-#if defined(__MINIPIC_DEBUG__)
+#if defined(MINIPIC_DEBUG)
     // check particles
     for (size_t is = 0; is < particles_m.size(); ++is) {
       particles_m[is].check(inf_m[0], sup_m[0],

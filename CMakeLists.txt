@@ -120,8 +120,8 @@ target_include_directories(
 target_compile_definitions(
   minipic
   PUBLIC
-    $<$<BOOL:${MINIPIC_DEBUG}>:__MINIPIC_DEBUG__>
-    $<$<BOOL:${MINIPIC_UNIFIED_MEMORY}>:__MINIPIC_KOKKOS_UNIFIED__>
+    $<$<BOOL:${MINIPIC_DEBUG}>:MINIPIC_DEBUG>
+    $<$<BOOL:${MINIPIC_UNIFIED_MEMORY}>:MINIPIC_KOKKOS_UNIFIED>
 )
 target_link_libraries(
   minipic
