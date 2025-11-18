@@ -2,44 +2,41 @@
 
 ## Domain decomposition
 
-For the moment, miniPIC does not support distributed memory parallelism.
-
-The domain is decomposed into patches using a 3D cartesian decomposition. Each patch is designed to be independent and can be computed in parallel. It represents a piece of the domain that contains the particles and the local current field grid.
-
-Maxwell's equations are solved at the domain scale.
-Therefore, electromagnetic fields grids are global.
-A reduction operation is performed to compute the global current grid from the local current grids.
+MiniPIC does not support distributed memory parallelism and contains a single domain.
 
 ## PIC loop steps
 
-<img title="pic loop" alt="pic loop" src="./images/pic_loop.png" height="500">
+<img title="pic loop" alt="pic loop" src="./images/pic_loop.png" />
 
 ## Code design
 
 The figure below illustrates schematically the code design. It shows how the different classes are organized and how they interact with each other.
 
-<img title="code design" alt="code design" src="./images/code_design.png" height="700">
+<img title="code design" alt="code design" src="./images/code_design.png" />
 
 Each file provides either a set of functions, a namespace or a data container (class).
 
-| File                   | Where  |Description                                                                                 |
-|------------------------|--------|---------------------------------------------------------------------------------------------|
-| Headers                | common | Determine the best headers to use depending on the selected backend                         |
-| Backend                | common | Data container that contains backend specific parameters (often global) for parallelism     |
-| Vector                 | common | Vector class that mimics the std::vector with backend abstraction for both CPU and GPU      |
-| Field                  | common | Class that provides 3D arrays with backend abstraction for both CPU and GPU                 |
-| Particle               | common | Class that provides a particle container with backend abstraction for both CPU and GPU      |
-| ElectroMagn            | common | Class that provide a data container for electromagnetic and current grids                   |
-| Patch                  | common | Data container representing a patch entity (see patch decomposition)                        |
-| SubDomain              | model specific folders | SubDomain is a data container representing a domain piece                   |
-| Diagnostics            | common | Function to perform diagnostic output                                                       |
-| Operators              | model specific folders | Functions to perform the Particle-In-Cell loop (such as interpolator, pusher, projection, etc), this header is duplicated for each programming models |
-| Timers                 | common | Class that provide timer functionality to monitor the time and make statistics              |
-| Main                   | src    | Main source file for the global code structure                                              |
+| File              | Where                 | Description                                                                      |
+|-------------------|-----------------------|----------------------------------------------------------------------------------|
+| Diagnostics       | `src/common`          | Function to perform diagnostic output                                            |
+| ElectroMagn       | `src/common`          | Class that provide an electromagnetic and current grids based on Kokkos 3D views |
+| Headers           | `src/common`          | Determine the best headers to use depending on the selected backend              |
+| Managers          | `src/common`          | Free functions called by the subdomain manager, to call the operators            |
+| Operators         | `src/common`          | Free functions performing mathematical operations for the simulation             |
+| Params            | `src/common`          | Parameters of the simulation                                                     |
+| Particle          | `src/common`          | Class that provides a particle container based on Kokkos 1D views                |
+| Setup             | `src/common`          | Free function that returns a `Params` object describing a specific setup         |
+| SubDomain         | `src/common`          | Data structure that stores and manages a subdomain                               |
+| Timers            | `src/common`          | Class that provide timer functionality                                           |
+| Tools             | `src/common`          | Various tools for the project                                                    |
+| Main              | `src`                 | Main source file for the global code structure                                   |
+| Managers          | Implementation folder | Free functions called by the subdomain manager, to call the operators            |
+| Operators         | Implementation folder | Free functions performing mathematical operations for the simulation             |
+| Name of the setup | `src/setups`          | Setup describing a specific simulation                                           |
 
 ## Macros
 
-| Macros                   | Description                                                            |
-|--------------------------|------------------------------------------------------------------------|
-| `__MINIPIC_KOKKOS_SCATTERVIEW__` | Activate specific KOKKOS projection types: scatter_view.       |
-| `__MINIPIC_KOKKOS_UNIFIED__ ` | Macro for code using Kokkos with unified memory                   |
+| Macros                        | Description                                      |
+|-------------------------------|--------------------------------------------------|
+| `MINIPIC_DEBUG`               | Enable verbose output                            |
+| `MINIPIC_KOKKOS_SCATTER_VIEW` | Use Kokkos scatter views for projection operator |

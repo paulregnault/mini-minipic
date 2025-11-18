@@ -1,21 +1,21 @@
 /* _____________________________________________________________________ */
-//! \file Operators.hpp
+//! \file Operators.cpp
 
 //! \brief contains generic kernels for the particle pusher
 
 /* _____________________________________________________________________ */
 
-#ifndef OPERATORS_H
-#define OPERATORS_H
+#include <cmath>
 
-#include "ElectroMagn.hpp"
-#include "Headers.hpp"
-#include "Particles.hpp"
 #include <Kokkos_Core.hpp>
+
+#include "Operators.hpp"
 
 namespace operators {
 
-// Returns the sum of all elements of a View on the host
+//! \brief Returns the sum of all elements of a View on the host.
+//! \param[in] view View on the host to reduce.
+//! \returns Sum of all values.
 double sum_host(typename Particles::hostview_t view) {
   double res = 0.f;
   for (size_t i=0; i < view.extent(0); ++i) {
@@ -24,7 +24,9 @@ double sum_host(typename Particles::hostview_t view) {
   return res;
 }
 
-// Returns the sum of all elements of a View on the device
+//! \brief Returns the sum of all elements of a View on the device
+//! \param[in] view View on the device to reduce.
+//! \returns Sum of all values.
 double sum_device(typename Particles::view_t view) {
   double res;
   Kokkos::parallel_reduce(Kokkos::RangePolicy(0, view.extent(0)),
@@ -35,31 +37,31 @@ double sum_device(typename Particles::view_t view) {
   return res;
 }
 
-double sum_power(ElectroMagn::view_t v, const int power) {
+//! \brief Returns the sum of the power of all elements of a View on the host
+//! \param[in] view View on the host to reduce.
+//! \param[in] power Value of the exponent.
+//! \returns Sum of the power of all values.
+double sum_power(ElectroMagn::hostview_t v, const int power) {
   double sum = 0;
-
-  // ---> Host case
-  typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>>
-    mdrange_policy;
-  Kokkos::parallel_reduce(
-      "sum_field_on_device",
-      mdrange_policy({0, 0, 0}, {v.extent(0), v.extent(1), v.extent(2)}),
-      KOKKOS_LAMBDA(const int ix, const int iy, const int iz, double &local_sum) {
-      local_sum += std::pow(v(ix, iy, iz), power);
-      },
-      sum);
+  for (std::size_t i = 0; i < v.extent(0); i++)
+    for (std::size_t j = 0; j < v.extent(1); j++)
+      for (std::size_t k = 0; k < v.extent(2); k++) {
+        sum += std::pow(v(i, j, k), power);
+      }
 
   return sum;
 }
 
-double sum_power(ElectroMagn::hostview_t v, const int power) {
+//! \brief Returns the sum of the power of all elements of a View on the device
+//! \param[in] view View on the device to reduce.
+//! \param[in] power Value of the exponent.
+//! \returns Sum of the power of all values.
+double sum_power(ElectroMagn::view_t v, const int power) {
   double sum = 0;
 
-  // ---> Host case
-  typedef Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<3>>
-    mdrange_policy;
+  using mdrange_policy = Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<3>>;
   Kokkos::parallel_reduce(
-      "sum_field_on_host",
+      "sum_field_on_device",
       mdrange_policy({0, 0, 0}, {v.extent(0), v.extent(1), v.extent(2)}),
       KOKKOS_LAMBDA(const int ix, const int iy, const int iz, double &local_sum) {
       local_sum += Kokkos::pow(v(ix, iy, iz), power);
@@ -69,14 +71,10 @@ double sum_power(ElectroMagn::hostview_t v, const int power) {
   return sum;
 }
 
-// ______________________________________________________________________________
-//
-//! \brief Interpolation operator :
-//! interpolate EM fields from global grid for each particle
+//! \brief Interpolation operator: interpolate EM fields from global grid for each particle
 //! \param[in] em  global electromagnetic fields
 //! \param[in] particles  vector of particle species
-// ______________________________________________________________________________
-auto interpolate(ElectroMagn &em, std::vector<Particles> &particles) -> void {
+void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
 
   for (size_t is = 0; is < particles.size(); is++) {
 
@@ -222,13 +220,10 @@ auto interpolate(ElectroMagn &em, std::vector<Particles> &particles) -> void {
   } // Species loop
 }
 
-// ______________________________________________________________________________
-//
-//! \brief Move the particle in the space, compute with EM fields interpolate
-//! \param[in] particles  vector of particle species
-//! \param[in] dt time step to use for the pusher
-// ______________________________________________________________________________
-auto push(std::vector<Particles> &particles, double dt) -> void {
+//! \brief Move the particle in the space, compute with EM fields interpolate.
+//! \param[in] particles Vector of particle species.
+//! \param[in] dt Time step to use for the pusher.
+void push(std::vector<Particles> &particles, double dt) {
   // For each species
   for (size_t is = 0; is < particles.size(); is++) {
 
@@ -291,13 +286,11 @@ auto push(std::vector<Particles> &particles, double dt) -> void {
   } // Loop on species
 }
 
-// ______________________________________________________________________________
-//
-//! \brief Push only the momentum
-//! \param[in] particles vector of species Particles
-//! \param[in] dt time step to use for the pusher
-// ______________________________________________________________________________
-auto push_momentum(std::vector<Particles> &particles, double dt) -> void {
+//! \brief Push only the momentum.
+//! \note Only used for the initialization of some setups.
+//! \param[in] particles Vector of species Particles.
+//! \param[in] dt Time step to use for the pusher.
+void push_momentum(std::vector<Particles> &particles, double dt) {
   // for each species
   for (size_t is = 0; is < particles.size(); is++) {
 
@@ -356,15 +349,11 @@ auto push_momentum(std::vector<Particles> &particles, double dt) -> void {
   } // end for species
 }
 
-// _____________________________________________________________________
-//
 //! \brief Boundaries condition on the particles, periodic
-//! or reflect the particles which leave the domain
-//
-//! \param[in] Params & params - constant global simulation parameters
-//! \param[in] std::vector<Particles> & particles - vector of species Particles
-// _____________________________________________________________________
-auto pushBC(Params &params, std::vector<Particles> &particles) -> void {
+//! or reflect the particles which leave the domain.
+//! \param[in] params Constant global simulation parameters.
+//! \param[in] particles Vector of species particles.
+void pushBC(const Params &params, std::vector<Particles> &particles) {
   const double inf_global[3] = {params.inf_x, params.inf_y, params.inf_z};
   const double sup_global[3] = {params.sup_x, params.sup_y, params.sup_z};
 
@@ -436,14 +425,11 @@ auto pushBC(Params &params, std::vector<Particles> &particles) -> void {
   } // if type of conditions
 }
 
-// _______________________________________________________________________
-//
-//! \brief Current projection directly in the global array
-//! \param[in] params constant global parameters
-//! \param[in] em electromagnetic fields
-//! \param[in] particles vector of species Particles
-// _______________________________________________________________________
-void project(Params &params, ElectroMagn &em, std::vector<Particles> &particles) {
+//! \brief Current projection directly in the global array.
+//! \param[in] params Constant global parameters.
+//! \param[in] em Electromagnetic fields.
+//! \param[in] particles Vector of species particles.
+void project(const Params &params, ElectroMagn &em, std::vector<Particles> &particles) {
   for (size_t is = 0; is < particles.size(); is++) {
 
     const int n_particles            = particles[is].size();
@@ -533,12 +519,10 @@ void project(Params &params, ElectroMagn &em, std::vector<Particles> &particles)
   }  // end for each species
 }
 
-// _______________________________________________________
-//
-//! \brief Solve Maxwell equations to compute EM fields
-//! \param params global parameters
-// _______________________________________________________
-auto solve_maxwell(const Params &params, ElectroMagn &em) -> void {
+//! \brief Solve Maxwell equations to compute EM fields.
+//! \param[in] params Constant global parameters.
+//! \param[in] em Electromagnetic fields.
+void solve_maxwell(const Params &params, ElectroMagn &em) {
   const double dt         = params.dt;
   const double dt_over_dx = params.dt * params.inv_dx;
   const double dt_over_dy = params.dt * params.inv_dy;
@@ -626,12 +610,10 @@ auto solve_maxwell(const Params &params, ElectroMagn &em) -> void {
 
 } // end solve
 
-// _______________________________________________________________
-//
-//! \brief Boundaries condition on the global grid
-//! \param[in] Params & params - global constant parameters
-// _______________________________________________________________
-void currentBC(Params &params, ElectroMagn &em) {
+//! \brief Boundaries condition on the global grid.
+//! \param[in] params Global constant parameters.
+//! \param[in] em Electromagnetic fields.
+void currentBC(const Params &params, ElectroMagn &em) {
   if (params.boundary_condition == "periodic") {
 
     ElectroMagn::view_t Jx = em.Jx_m;
@@ -757,12 +739,10 @@ void currentBC(Params &params, ElectroMagn &em) {
   } // end if periodic
 } // end currentBC
 
-// _______________________________________________________________
-//
-//! \brief Boundaries condition on the global grid
-//! \param[in] Params & params - global constant parameters
-// _______________________________________________________________
-auto solveBC(Params &params, ElectroMagn &em) -> void {
+//! \brief Boundaries condition on the global grid.
+//! \param[in] params Global constant parameters.
+//! \param[in] em Electromagnetic fields.
+void solveBC(const Params &params, ElectroMagn &em) {
   typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>> mdrange_policy;
 
   if (params.boundary_condition == "periodic") {
@@ -939,18 +919,18 @@ auto solveBC(Params &params, ElectroMagn &em) -> void {
   } // End if
 } // End solveBC
 
-// ____________________________________________________________________________
-//! \brief Emit a laser field in the x direction using an antenna
-//! \param[in] Params & params - global constant parameters
-//! \param[in] profile - (std::function<double(double y, double z, double t)>) profile of the
-//! antenna \param[in] x - (double) position of the antenna \param[in] double t - (double) current
-//! time
-// ____________________________________________________________________________
-auto antenna(Params &params,
+//! \brief Emit a laser field in the $x$ direction using an antenna.
+//! \note Only used for some setups.
+//! \param[in] params Global constant parameters.
+//! \param[in] em Electromagnetic fields.
+//! \param[in] profile Profile of the antenna.
+//! \param[in] x Position of the antenna.
+//! \param[in] t Current time.
+void antenna(const Params &params,
              ElectroMagn &em,
              std::function<double(double, double, double)> profile,
              double x,
-             double t) -> void {
+             double t) {
 
   ElectroMagn::hostview_t *J = &em.Jz_h_m;
 
@@ -971,5 +951,3 @@ auto antenna(Params &params,
 } // end antenna
 
 } // end namespace operators
-
-#endif // OPERATORS_H

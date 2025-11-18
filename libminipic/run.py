@@ -28,7 +28,7 @@ configuration_list = {
         "env": {},
         "prefix": [],
         "exe_name": "minipic",
-        "setups": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna", "e_cst", "b_cst"],
         "args": [[], [], []],
     },
     "cpu-openmp": {
@@ -40,7 +40,7 @@ configuration_list = {
         "env": {"OMP_PROC_BIND": "spread", "OMP_NUM_THREADS": "8"},
         "prefix": [],
         "exe_name": "minipic",
-        "setups": ["thermal", "beam", "antenna"],
+        "setups": ["thermal", "beam", "antenna", "e_cst", "b_cst"],
         "args": [[], [], []],
     },
     "gpu-v100": {

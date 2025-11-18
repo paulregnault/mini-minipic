@@ -22,15 +22,10 @@ void setup(Params &params) {
   params.sup_y = 1.;
   params.sup_z = 1.;
 
-  // Number of patches
-  params.nx_patch = 4;
-  params.ny_patch = 4;
-  params.nz_patch = 4;
-
   // Cells per patch per direction
-  params.nx_cells = 8;
-  params.ny_cells = 8;
-  params.nz_cells = 8;
+  params.nx_cells = 32;
+  params.ny_cells = 32;
+  params.nz_cells = 32;
 
   // Time
 

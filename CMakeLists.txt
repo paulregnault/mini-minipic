@@ -34,7 +34,7 @@ message("Build type: ${CMAKE_BUILD_TYPE}")
 # Debug and test modes
 option(MINIPIC_DEBUG "Debug messages" OFF)
 option(MINIPIC_WARNING "Warning mode" OFF)
-option(MINIPIC_UNIFIED_MEMORY "Use unified memory" OFF)
+option(MINIPIC_KOKKOS_SCATTER_VIEW "Use scatter views (Kokkos implementation)" OFF)
 set(MINIPIC_IMPLEMENTATION "exercise" CACHE STRING "Which implementation to use (must be an existing directory in src/)")
 set(MINIPIC_SETUP "antenna" CACHE STRING "Which setup to build and run with (must be the stem name of a valid .cpp file in src/setups/)")
 
@@ -52,9 +52,9 @@ endif()
 message("Warning mode: ${MINIPIC_WARNING}")
 
 # _________________________________________________________________
-# Unified memory
+# Scatter view
 
-message("Unified memory: ${MINIPIC_UNIFIED_MEMORY}")
+message("Kokkos scatter view: ${MINIPIC_KOKKOS_SCATTER_VIEW}")
 
 # _________________________________________________________________
 # Implementation
@@ -108,20 +108,20 @@ add_executable(
   "src/common/Params.cpp"
   "src/common/Tools.cpp"
   "${SETUP_FILE}"
+  "${IMPLEMENTATION_DIRECTORY}/Managers.cpp"
+  "${IMPLEMENTATION_DIRECTORY}/Operators.cpp"
   "src/main.cpp"
 )
 target_include_directories(
   minipic
   PUBLIC
-    "src/setups"
     "src/common"
-    "${IMPLEMENTATION_DIRECTORY}"
 )
 target_compile_definitions(
   minipic
   PUBLIC
-    $<$<BOOL:${MINIPIC_DEBUG}>:__MINIPIC_DEBUG__>
-    $<$<BOOL:${MINIPIC_UNIFIED_MEMORY}>:__MINIPIC_KOKKOS_UNIFIED__>
+    $<$<BOOL:${MINIPIC_DEBUG}>:MINIPIC_DEBUG>
+    $<$<BOOL:${MINIPIC_KOKKOS_SCATTER_VIEW}>:MINIPIC_KOKKOS_SCATTER_VIEW>
 )
 target_link_libraries(
   minipic

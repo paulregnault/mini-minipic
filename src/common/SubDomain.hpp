@@ -1,4 +1,3 @@
-
 /* _____________________________________________________________________ */
 //! \file SubDomain.hpp
 
@@ -13,9 +12,9 @@
 #include "ElectroMagn.hpp"
 #include "Particles.hpp"
 #include "Diagnostics.hpp"
-#include "Operators.hpp"
 #include "Params.hpp"
 #include "Timers.hpp"
+#include "Managers.hpp"
 
 //! \brief Wrapper class to clean main
 class SubDomain {
@@ -341,16 +340,8 @@ public:
 
     } // end for species
 
-    // Momentum correction (to respect the leap frog scheme)
-    if (params.momentum_correction) {
-
-      std::cout << " > Apply momentum correction "
-                << "\n"
-                << std::endl;
-
-      operators::interpolate(em_m, particles_m);
-      operators::push_momentum(particles_m, -0.5 * params.dt);
-    }
+    // initializations steps that require to use operators
+    managers::initialize(params, em_m, particles_m);
 
     // For each species, print :
     // - total number of particles
@@ -475,91 +466,7 @@ public:
   //! \param[in] int it iteration number
   // ______________________________________________________________________________
   void iterate(Params &params, int it) {
-
-    if (params.current_projection || params.n_particles > 0) {
-
-      DEBUG("  -> start reset current");
-
-      em_m.reset_currents(minipic::device);
-
-      DEBUG("  -> stop reset current");
-    }
-
-    // Interpolate from global field to particles
-    DEBUG("  -> start interpolate ");
-
-    operators::interpolate(em_m, particles_m);
-
-    DEBUG("  -> stop interpolate");
-
-    // Push all particles
-    DEBUG("  -> start push ");
-
-    operators::push(particles_m, params.dt);
-
-    DEBUG("  -> stop push");
-
-    // Do boundary conditions on global domain
-    DEBUG("  -> Patch 0: start pushBC");
-
-    operators::pushBC(params, particles_m);
-
-    DEBUG("  -> stop pushBC");
-
-    // Projection in local field
-    if (params.current_projection) {
-
-      // Projection directly in the global grid
-      DEBUG("  ->  start projection");
-
-      operators::project(params, em_m, particles_m);
-
-      DEBUG("  ->  stop projection");
-    }
-
-    // __________________________________________________________________
-    // Sum all species contribution in the local and global current grids
-
-    if (params.current_projection || params.n_particles > 0) {
-
-      // Perform the boundary conditions for current
-      DEBUG("  -> start current BC")
-
-      operators::currentBC(params, em_m);
-
-      DEBUG("  -> stop current BC")
-
-    } // end if current projection
-
-    // __________________________________________________________________
-    // Maxwell solver
-
-    if (params.maxwell_solver) {
-
-      // Generate a laser field with an antenna
-      for (size_t iantenna = 0; iantenna < params.antenna_profiles_m.size(); iantenna++) {
-        operators::antenna(params,
-                           em_m,
-                           params.antenna_profiles_m[iantenna],
-                           params.antenna_positions_m[iantenna],
-                           it * params.dt);
-      }
-
-      // Solve the Maxwell equation
-      DEBUG("  -> start solve Maxwell")
-
-      operators::solve_maxwell(params, em_m);
-
-      DEBUG("  -> stop solve Maxwell")
-
-      // Boundary conditions on EM fields
-      DEBUG("  -> start solve BC")
-
-      operators::solveBC(params, em_m);
-
-      DEBUG("  -> end solve BC")
-
-    } // end test params.maxwell_solver
+    managers::iterate(params, em_m, particles_m, it);
   }
 
   // ________________________________________________________________

@@ -37,10 +37,6 @@ public:
 const Host host;
 const Device device;
 
-template <typename T> inline void atomicAdd(T *address, T value) {
-  *address += value;
-}
-
 } // namespace minipic
 
 #endif

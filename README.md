@@ -15,7 +15,7 @@ The goal of the hakathon is to finish this port, and to optimize it for GPU arch
 Kokkos data containers, program structures, and command line management are already implemented in `src/common` files, you should not have to modify them.
 Cases, also known as setups, are hard-coded in `src/setups` and selected at compile time, you should not have to modify them either (at least for porting).
 Your work will essentially take place in the `src/exercise` directory, in two files of different granularity.
-The operators file is where most operators remain to be ported to Kokkos, whereas the subdomain file is the main time loop, that calls the aforementioned operators.
+The operators file is where most operators remain to be ported to Kokkos, whereas the managers file calls the aforementioned operators for one iteration, or for the initialization.
 
 If you want to skip the porting part, you can directly start from the `src/kokkos` code.
 
@@ -44,8 +44,8 @@ If you want to skip the porting part, you can directly start from the `src/kokko
   - `setups`: headers used to initialize the physical parameters;
   - `common`: source files common to all backends;
   - implementation specific folder (`kokkos`, `exercise`, etc.):
-    - `Operators.hpp`: Operator functions;
-    - `SubDomain.hpp`: Time loop that calls above operator;
+    - `Operators.cpp`: Operator functions;
+    - `Managers.cpp`: Functions that call operators for one iteration or for domain initialization;
 - `libminipic`: Python libraries for miniPIC Python tools and validation scripts:
 - `script`: Python scripts to read and plot diags (requires `libminipic`);
 - `slurm`: Slurm scripts for various supercomputers;
