@@ -394,11 +394,11 @@ def run():
             shutil.rmtree(bench_dir, ignore_errors=True)
         os.makedirs(bench_dir, exist_ok=True)
 
-        cmake_command = ["cmake", root_dir, "-DMINIPIC_SETUP={}".format(setup)]
+        cmake_command = ["cmake", root_dir, "-DMINI_MINIPIC_SETUP={}".format(setup)]
 
         # handle implementation
         if implementation:
-            cmake_command.append(f"-DMINIPIC_IMPLEMENTATION={implementation}")
+            cmake_command.append(f"-DMINI_MINIPIC_IMPLEMENTATION={implementation}")
 
         # handle compiler
         if compiler:

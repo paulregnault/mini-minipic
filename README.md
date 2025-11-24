@@ -1,11 +1,18 @@
-# miniPIC for CExA
+# (mini)miniPIC for CExA
+
+<center>
+
+![(mini)miniPIC title](doc/images/title.png)
+
+</center>
 
 ## Presentation
 
-miniPIC is a playground for computer science and HPC experiments applied to the Particle-In-Cell method.
+(mini)miniPIC is a playground for computer science and HPC experiments applied to the Particle-In-Cell method.
+The project is based on the [miniPIC](https://github.com/Maison-de-la-Simulation/miniPIC) solver.
 
 > [!WARNING]
-> miniPIC is not a code intended to be used for numerical simulation of physical cases.
+> (mini)miniPIC is not a code intended to be used for numerical simulation of physical cases.
 
 ## Directions
 
@@ -42,11 +49,11 @@ If you want to skip the porting part, you can directly start from the `src/kokko
 - `doc`: documentation pages;
 - `src`: C++ sources:
   - `setups`: headers used to initialize the physical parameters;
-  - `common`: source files common to all backends;
-  - implementation specific folder (`kokkos`, `exercise`, etc.):
+  - `common`: source files common to the project;
+  - implementation specific folder (`kokkos`, `exercise`, you may create yours):
     - `Operators.cpp`: Operator functions;
     - `Managers.cpp`: Functions that call operators for one iteration or for domain initialization;
-- `libminipic`: Python libraries for miniPIC Python tools and validation scripts:
+- `libminipic`: Python libraries for (mini)miniPIC Python tools and validation scripts:
 - `script`: Python scripts to read and plot diags (requires `libminipic`);
 - `slurm`: Slurm scripts for various supercomputers;
 - `external`: Git submodules location.
@@ -57,8 +64,7 @@ If you want to skip the porting part, you can directly start from the `src/kokko
 - [Compilation](./doc/compilation.md)
 - [Setups and how to create them](./doc/setups.md)
 - [Python tools for validation](./doc/python_tools.md)
-- [plot diags](./doc/diags.md)
-- [Timers](./doc/timers.md)
+- [Plot diags](./doc/diags.md)
 
 ## Publications
 

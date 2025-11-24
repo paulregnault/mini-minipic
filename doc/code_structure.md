@@ -2,7 +2,7 @@
 
 ## Domain decomposition
 
-MiniPIC does not support distributed memory parallelism and contains a single domain.
+(mini)miniPIC does not support distributed memory parallelism and contains a single domain.
 
 ## PIC loop steps
 
@@ -20,7 +20,7 @@ Each file provides either a set of functions, a namespace or a data container (c
 |-------------------|-----------------------|----------------------------------------------------------------------------------|
 | Diagnostics       | `src/common`          | Function to perform diagnostic output                                            |
 | ElectroMagn       | `src/common`          | Class that provide an electromagnetic and current grids based on Kokkos 3D views |
-| Headers           | `src/common`          | Determine the best headers to use depending on the selected backend              |
+| Headers           | `src/common`          | Some helpers                                                                     |
 | Managers          | `src/common`          | Free functions called by the subdomain manager, to call the operators            |
 | Operators         | `src/common`          | Free functions performing mathematical operations for the simulation             |
 | Params            | `src/common`          | Parameters of the simulation                                                     |
@@ -36,7 +36,7 @@ Each file provides either a set of functions, a namespace or a data container (c
 
 ## Macros
 
-| Macros                        | Description                                      |
-|-------------------------------|--------------------------------------------------|
-| `MINIPIC_DEBUG`               | Enable verbose output                            |
-| `MINIPIC_KOKKOS_SCATTER_VIEW` | Use Kokkos scatter views for projection operator |
+| Macros                             | Description                                      |
+|------------------------------------|--------------------------------------------------|
+| `MINI_MINIPIC_DEBUG`               | Enable verbose output                            |
+| `MINI_MINIPIC_KOKKOS_SCATTER_VIEW` | Use Kokkos scatter views for projection operator |

@@ -1,6 +1,6 @@
 # Python tools (`libminipic`)
 
-MiniPIC uses several tools gathered in the `libminipic` library.
+(mini)miniPIC uses several tools gathered in the `libminipic` library.
 These tools are used for full execution, validation, printing, verification, and plotting.
 
 Two commands and several scripts are available.

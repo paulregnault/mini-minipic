@@ -22,7 +22,7 @@
 #define DEBUG_STYLE "\033[1;36m"
 #define FOOTER_STYLE "\033[0m"
 
-#ifdef MINIPIC_DEBUG
+#ifdef MINI_MINIPIC_DEBUG
 #define DEBUG(message) \
   { std::cerr << DEBUG_STYLE << message << FOOTER_STYLE << std::endl; }
 #else

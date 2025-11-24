@@ -21,7 +21,7 @@ def detect_setup(path: Path) -> str:
         raise MissingFileMiniPICError(f"Cannot find {cmake_cache_file}")
 
     cmake_cache_content = cmake_cache_file.read_text()
-    matcher = re.findall(r"MINIPIC_SETUP:STRING=(.*)", cmake_cache_content)
+    matcher = re.findall(r"MINI_MINIPIC_SETUP:STRING=(.*)", cmake_cache_content)
 
     if not matcher:
         raise IncorrectFileMiniPICError(f"Cannot find setup in {cmake_cache_file}")

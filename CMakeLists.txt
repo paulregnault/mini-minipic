@@ -35,25 +35,25 @@ endif()
 message("Build type: ${CMAKE_BUILD_TYPE}")
 
 # Debug and test modes
-option(MINIPIC_DEBUG "Debug messages" OFF)
-option(MINIPIC_WARNING "Warning mode" OFF)
-option(MINIPIC_KOKKOS_SCATTER_VIEW "Use scatter views (Kokkos implementation)" OFF)
+option(MINI_MINIPIC_DEBUG "Debug messages" OFF)
+option(MINI_MINIPIC_WARNING "Warning mode" OFF)
+option(MINI_MINIPIC_KOKKOS_SCATTER_VIEW "Use scatter views (Kokkos implementation)" OFF)
 set(
-  MINIPIC_IMPLEMENTATION
+  MINI_MINIPIC_IMPLEMENTATION
   "exercise"
   CACHE
   STRING
   "Which implementation to use (must be an existing directory in src/)"
 )
 set(
-  MINIPIC_SETUP
+  MINI_MINIPIC_SETUP
   "antenna"
   CACHE
   STRING
   "Which setup to build and run with (must be the stem name of a valid .cpp file in src/setups/)"
 )
 set(
-  MINIPIC_KOKKOS_SOURCE_DIRECTORY
+  MINI_MINIPIC_KOKKOS_SOURCE_DIRECTORY
   "${CMAKE_CURRENT_SOURCE_DIR}/external/kokkos"
   CACHE
   PATH
@@ -63,38 +63,38 @@ set(
 # _________________________________________________________________
 # Debug mode
 
-message("Debug mode: ${MINIPIC_DEBUG}")
+message("Debug mode: ${MINI_MINIPIC_DEBUG}")
 
 # _________________________________________________________________
 # Warning mode
 
-if(MINIPIC_WARNING)
+if(MINI_MINIPIC_WARNING)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 endif()
-message("Warning mode: ${MINIPIC_WARNING}")
+message("Warning mode: ${MINI_MINIPIC_WARNING}")
 
 # _________________________________________________________________
 # Scatter view
 
-message("Kokkos scatter view: ${MINIPIC_KOKKOS_SCATTER_VIEW}")
+message("Kokkos scatter view: ${MINI_MINIPIC_KOKKOS_SCATTER_VIEW}")
 
 # _________________________________________________________________
 # Implementation
 
-set(IMPLEMENTATION_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/${MINIPIC_IMPLEMENTATION}")
+set(IMPLEMENTATION_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/${MINI_MINIPIC_IMPLEMENTATION}")
 if(NOT EXISTS "${IMPLEMENTATION_DIRECTORY}")
-  message(FATAL_ERROR "Cannot find implementation '${MINIPIC_IMPLEMENTATION}' in src/")
+  message(FATAL_ERROR "Cannot find implementation '${MINI_MINIPIC_IMPLEMENTATION}' in src/")
 endif()
-message("Implementation: ${MINIPIC_IMPLEMENTATION}")
+message("Implementation: ${MINI_MINIPIC_IMPLEMENTATION}")
 
 # _________________________________________________________________
 # Setup
 
-set(SETUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/setups/${MINIPIC_SETUP}.cpp")
+set(SETUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/setups/${MINI_MINIPIC_SETUP}.cpp")
 if(NOT EXISTS "${SETUP_FILE}")
-  message(FATAL_ERROR "Cannot find setup file ${MINIPIC_SETUP}.cpp in src/setups/")
+  message(FATAL_ERROR "Cannot find setup file ${MINI_MINIPIC_SETUP}.cpp in src/setups/")
 endif()
-message("Setup: ${MINIPIC_SETUP}")
+message("Setup: ${MINI_MINIPIC_SETUP}")
 
 message("------------------------------------------------------------------")
 
@@ -115,18 +115,18 @@ if(Kokkos_FOUND)
   message(STATUS "  With backend: ${Kokkos_DEVICES}")
   message(STATUS "  With options: ${Kokkos_OPTIONS}")
   message(STATUS "  For architectures: ${Kokkos_ARCH}")
-elseif(EXISTS "${MINIPIC_KOKKOS_SOURCE_DIRECTORY}/CMakeLists.txt")
-  message(STATUS "Kokkos provided as a submodule: ${MINIPIC_KOKKOS_SOURCE_DIRECTORY}")
+elseif(EXISTS "${MINI_MINIPIC_KOKKOS_SOURCE_DIRECTORY}/CMakeLists.txt")
+  message(STATUS "Kokkos provided as a submodule: ${MINI_MINIPIC_KOKKOS_SOURCE_DIRECTORY}")
   add_subdirectory(external/kokkos)
 else()
-  message(STATUS "Kokkos downloaded: ${MINIPIC_KOKKOS_SOURCE_DIRECTORY}")
+  message(STATUS "Kokkos downloaded: ${MINI_MINIPIC_KOKKOS_SOURCE_DIRECTORY}")
   include(FetchContent)
   FetchContent_Declare(
     kokkos
     DOWNLOAD_EXTRACT_TIMESTAMP ON
     URL https://github.com/kokkos/kokkos/releases/download/4.6.01/kokkos-4.6.01.tar.gz
     URL_HASH SHA256=b9d70e4653b87a06dbb48d63291bf248058c7c7db4bd91979676ad5609bb1a3a
-    SOURCE_DIR "${MINIPIC_KOKKOS_SOURCE_DIRECTORY}"
+    SOURCE_DIR "${MINI_MINIPIC_KOKKOS_SOURCE_DIRECTORY}"
   )
   FetchContent_MakeAvailable(kokkos)
 endif()
@@ -151,8 +151,8 @@ target_include_directories(
 target_compile_definitions(
   minipic
   PUBLIC
-    $<$<BOOL:${MINIPIC_DEBUG}>:MINIPIC_DEBUG>
-    $<$<BOOL:${MINIPIC_KOKKOS_SCATTER_VIEW}>:MINIPIC_KOKKOS_SCATTER_VIEW>
+    $<$<BOOL:${MINI_MINIPIC_DEBUG}>:MINI_MINIPIC_DEBUG>
+    $<$<BOOL:${MINI_MINIPIC_KOKKOS_SCATTER_VIEW}>:MINI_MINIPIC_KOKKOS_SCATTER_VIEW>
 )
 target_link_libraries(
   minipic
