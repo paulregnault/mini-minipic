@@ -2,30 +2,60 @@
 
 ## Prerequisites
 
-miniPIC uses CMake (version ≥ 3.16) as a build system. For using Kokkos, you have two options:
+miniPIC uses CMake (version ≥ 3.16) as a build system. For using Kokkos, you have three options (by order of recommendation):
 
-1. **Using a Git submodule** (recommended)
-2. **Using an installed Kokkos library** 
+1. Using CMake FetchContent
+1. Using a Git submodule
+2. Using an installed instance of Kokkos
 
-### Method 1: Using a Git submodule (recommended)
+### Method 1: Using CMake FetchContent
 
-```bash
-git clone --recurse-submodules <url of the repo>
-```
-
-If you have cloned without the submodules:
-
-```sh
-git submodule update --init
-```
-
-### Method 2: Using an installed Kokkos
+CMake would download an archive of Kokkos and decompress it in `external/kokkos` by default.
 
 ```bash
 git clone <url of the repo>
 ```
 
-If you have Kokkos already installed, you will need to tell CMake where to find it with `-DKokkos_ROOT=/path/to/kokkos/install`.
+### Method 2: Using a Git submodule
+
+Git would clone the Kokkos repo in `external/kokkos` and switch to a stable branch.
+
+```bash
+git clone --recurse-submodules <url of the repo>
+```
+
+If you have cloned without the submodules (i.e. `git clone <url of the repo>`):
+
+```sh
+git submodule update --init
+```
+
+### Method 4: Using an installed instance of Kokkos
+
+Kokkos would be already installed, either by an administrator or by yourself.
+
+<details>
+
+<summary>Kokkos installation</summary>
+
+```sh
+git clone --branch <kokkos version> https://github.com/kokkos/kokkos.git
+cd kokkos
+cmake -B build -DCMAKE_INSTALL_PREFIX=/path/to/kokkos/install <kokkos extra flags>
+cmake --build build --parallel
+cmake --install build
+```
+
+Please check [the documentation](https://kokkos.org/kokkos-core-wiki/get-started/building-from-source.html) for the Kokkos flags.
+Note that you need one build (and one installation directory) per backend and architecture.
+
+</details>
+
+```bash
+git clone <url of the repo>
+```
+
+Then, you would need to tell CMake where to find Kokkos with `-DKokkos_ROOT=/path/to/kokkos/install`.
 
 ## Build
 
@@ -40,7 +70,7 @@ cmake --build build
 
 <img title="Warning" alt="Warning" src="./images/warning.png" height="20"> By default, the code is compiled with Kokkos serial backend (sequential mode).
 
-Note that you have to add `-DKokkos_ROOT=<...>` if you use an already installed version of Kokkos.
+Note that you have to add `-DKokkos_ROOT=</path/to/kokkos/install>` if you use an already installed instance of Kokkos.
 
 ### Options
 
