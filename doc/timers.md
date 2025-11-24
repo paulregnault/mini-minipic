@@ -2,7 +2,7 @@
 
 ## Introduction
 
-MiniPIC has an internal timing system that can be used to measure the time taken by different parts of the code.
+(mini)miniPIC has an internal timing system that can be used to measure the time taken by different parts of the code.
 The timers are updated all along the simulation.
 The results are printed at the end of the simulation and can be saved in a file `timers.json`.
 
@@ -19,7 +19,7 @@ In the setup file :
 
 ### Command line parameters
 
-Some parameters can be passed to MiniPIC as command line arguments:
+Some parameters can be passed to (mini)miniPIC as command line arguments:
 
 - `-sts` or `--save-timers-start` (unsigned int): First time step at which the timers are saved in the file `timers.json`. Default value is 0.
 - `-stp` or `--save-timers-period` (unsigned int): Period at which the timers are saved in the file `timers.json` from the start parameter `params.save_timers_start`. Default value is 0 (no output).

@@ -5,8 +5,8 @@
 miniPIC uses CMake (version ≥ 3.16) as a build system. For using Kokkos, you have three options (by order of recommendation):
 
 1. Using CMake FetchContent
-1. Using a Git submodule
-2. Using an installed instance of Kokkos
+2. Using a Git submodule
+3. Using an installed instance of Kokkos
 
 ### Method 1: Using CMake FetchContent
 
@@ -30,7 +30,7 @@ If you have cloned without the submodules (i.e. `git clone <url of the repo>`):
 git submodule update --init
 ```
 
-### Method 4: Using an installed instance of Kokkos
+### Method 3: Using an installed instance of Kokkos
 
 Kokkos would be already installed, either by an administrator or by yourself.
 
@@ -81,11 +81,11 @@ CMake generic options:
 
 Project specific options:
 
-- `-DMINIPIC_DEBUG=<ON/OFF>`: enable/disable debug messages (`OFF` by default);
-- `-DMINIPIC_WARNING=<ON/OFF>`: enable/disable compiler warnings (add `-Wall`, `-Wextra`, and `-Wpedantic`, `OFF` by default);
-- `-DMINIPIC_UNIFIED_MEMORY=<ON/OFF>`: enable/disable unified memory views (`OFF` by default);
-- `-DMINIPIC_IMPLEMENTATION=<implementation>`: which implementation to use (`exercise` or `kokkos`, default to the former);
-- `-DMINIPIC_SETUP=<setup>`: which setup to build and run with (`antenna`, `b_cst`, `beam`, `e_cst`, `thermal`, default to the former).
+- `-DMINI_MINIPIC_DEBUG=<ON/OFF>`: enable/disable debug messages (`OFF` by default);
+- `-DMINI_MINIPIC_WARNING=<ON/OFF>`: enable/disable compiler warnings (add `-Wall`, `-Wextra`, and `-Wpedantic`, `OFF` by default);
+- `-DMINI_MINIPIC_UNIFIED_MEMORY=<ON/OFF>`: enable/disable unified memory views (`OFF` by default);
+- `-DMINI_MINIPIC_IMPLEMENTATION=<implementation>`: which implementation to use (`exercise` or `kokkos`, default to the former);
+- `-DMINI_MINIPIC_SETUP=<setup>`: which setup to build and run with (`antenna`, `b_cst`, `beam`, `e_cst`, `thermal`, default to the former).
 
 ## Examples
 

@@ -2,7 +2,7 @@
 
 ## Domain decomposition
 
-MiniPIC does not support distributed memory parallelism and contains a single domain.
+(mini)miniPIC does not support distributed memory parallelism and contains a single domain.
 
 ## PIC loop steps
 
@@ -36,7 +36,7 @@ Each file provides either a set of functions, a namespace or a data container (c
 
 ## Macros
 
-| Macros                        | Description                                      |
-|-------------------------------|--------------------------------------------------|
-| `MINIPIC_DEBUG`               | Enable verbose output                            |
-| `MINIPIC_KOKKOS_SCATTER_VIEW` | Use Kokkos scatter views for projection operator |
+| Macros                             | Description                                      |
+|------------------------------------|--------------------------------------------------|
+| `MINI_MINIPIC_DEBUG`               | Enable verbose output                            |
+| `MINI_MINIPIC_KOKKOS_SCATTER_VIEW` | Use Kokkos scatter views for projection operator |
