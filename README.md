@@ -23,7 +23,7 @@ If you want to skip the porting part, you can directly start from the `src/kokko
 
 <summary>Some pointers if needed</summary>
 
-[![pointers](https://imgs.xkcd.com/comics/pointers.png) "XKCD"](https://xkcd.com/138/)
+[![pointers](https://imgs.xkcd.com/comics/pointers.png) XKCD](https://xkcd.com/138/)
 
 - Start by reading the doc!
 - You should first finish to port the operators in `src/exercise`;
@@ -32,7 +32,7 @@ If you want to skip the porting part, you can directly start from the `src/kokko
 - When it's done, you should focus on optimization;
 - You should use [Kokkos-tools](https://github.com/kokkos/kokkos-tools) to create regions and breakdown the time spent in the solver;
 - [Nsight Systems](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) may be useful to visualize the regions;
-- [Nsight Compute](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html) may be useful to analyze a specific region.
+- [Nsight Compute](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html) may be useful to analyze a specific kernel;
 - You should identify a bottleneck, try optimization strategies, and measure the gain, rinse and repeat (APOD method: Assess, Parallelize, Optimize, and Deploy).
 
 </details>
