@@ -5,7 +5,9 @@ These tools are used for full execution, validation, printing, verification, and
 
 Two commands and several scripts are available.
 
-## Python loading
+## Python version
+
+The `libminipic` requires Python ≥ 3.11.
 
 On a supercomputer, you may have to load a specific version of Python:
 
@@ -14,7 +16,6 @@ module load python<x.y>
 ```
 
 with `<x.y>` the version of Python.
-The `libminipic` requires Python ≥ 3.11.
 
 You can list the available versions with:
 
@@ -72,6 +73,7 @@ Here is a list of the available options:
 | `-s SETUP ` | `--setups SETUPS` | Specific setup, you can specify several setups with a coma. For instance "default,beam" |
 | | `--build-dir DIR` | Build directory to use, default to `build` |
 | | `--implementation IMPLEMENTATION` | Which implementation to use, default to `exercise` |
+| `-j PARALLEL` | `--parallel PARALLEL` | Number of jobs to use for the compilation, default to 4 |
 | `-a ARGUMENTS` | `--arguments ARGUMENTS` | Default arguments |
 | | `--fresh` | Whether to delete or not already existing files (clean before build) |
 | | `--clean` | Whether to delete or not the generated files (clean after run) |
@@ -108,7 +110,7 @@ mini-run
 #### Specific configuration
 
 ```bash
-mini-run -g gpu
+mini-run -g gpu-a100
 ```
 
 #### Custom compiler
@@ -137,7 +139,7 @@ Note the `=`, as with a space the argument parser would treat the option and the
 A validation mechanism can be used to validate simulation results.
 Output files are checked against reference values.
 
-You can access the help page by doing:
+You can access the documentation with:
 
 ```bash
 mini-validate -h
@@ -151,7 +153,7 @@ Here is a list of the available options:
 | --- | --- | --- |
 | `-s` | `--setup` | Name of the setup (autodetected by default) |
 | `-p` | `--path` | Path of the execution directory (default to curent directory) |
-| | `--threshold THRESHOLD` | Threshold for the validation |
+| | `--threshold THRESHOLD` | Threshold for the validation (default to $10^{-10}$) |
 
 ### Setups
 
