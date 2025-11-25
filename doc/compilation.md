@@ -59,7 +59,9 @@ Then, you would need to tell CMake where to find Kokkos with `-DKokkos_ROOT=/pat
 
 ## Build
 
-### Basic compilation (sequential mode)
+### Basic compilation
+
+Without any option provided, the sequential backend should be used.
 
 ```bash
 cmake -B build
@@ -90,45 +92,45 @@ Project specific options:
 
 ## Examples
 
-### Using a Git submodule
+### Using FetchContent or a Git submodule
 
-When using the submodule you can pass directly Kokkos options. See the [Kokkos CMake options documentation](https://kokkos.org/kokkos-core-wiki/get-started/configuration-guide.html).
+When getting Kokkos with CMake FetchContent or with a Git submodule, you should pass Kokkos options directly.
+See the [Kokkos CMake options documentation](https://kokkos.org/kokkos-core-wiki/get-started/configuration-guide.html).
 
 #### Basic compilation (defaults to serial backend)
 
 ```bash
 cmake -B build
-cmake --build build
+cmake --build build --parallel 10
 ```
 
 #### OpenMP compilation using GCC and OpenMP
 
 ```bash
 cmake -B build -DCMAKE_CXX_COMPILER=g++ -DKokkos_ENABLE_OPENMP=ON
-cmake --build build
+cmake --build build --parallel 10
 ```
 
 #### Kokkos compilation using Clang for CPU
 
 ```bash
-cmake -B build -DCMAKE_CXX_COMPILER=clang++ -DKokkos_ENABLE_SERIAL=ON
-cmake --build build
+cmake -B build -DCMAKE_CXX_COMPILER=clang++
+cmake --build build --parallel 10
 ```
 
-#### Kokkos compilation using `nvcc` for Nvidia V100
+#### Kokkos compilation using Cuda for Nvidia A100
 
 ```bash
-cmake -B build -DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_VOLTA70=ON
-cmake --build build
+cmake -B build -DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_AMPERE80=ON
+cmake --build build --parallel 10
 ```
 
-### Using and installed Kokkos
+### Using and installed instance of Kokkos
 
-When using a pre-installed Kokkos, you need to specify its location and the configuration should already be set in the compiled and installed library:
-
-- Using Kokkos installed in a custom location
+When using an already installed instance of Kokkos, you should specify its location to CMake at configuration time.
+Kokkos options would be automatically transferred.
 
 ```bash
 cmake -B build -DKokkos_ROOT=/path/to/kokkos/install
-cmake --build build
+cmake --build build --parallel 10
 ```
