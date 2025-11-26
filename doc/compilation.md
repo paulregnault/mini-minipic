@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-miniPIC uses CMake (version ≥ 3.16) as a build system. For using Kokkos, you have three options (by order of recommendation):
+(mini)miniPIC uses CMake (version ≥ 3.22) as a build system. For using Kokkos, you have three options (by order of recommendation):
 
 1. Using CMake FetchContent
 2. Using a Git submodule
