@@ -92,7 +92,7 @@ Here is a list of all configurations:
 | Configuration | Description |
 | --- | --- |
 | cpu-serial | CPU serial |
-| cpu-openmp | CPU with OpenMP, 8 threads and `OMP_PROC_BIND` set to `spread` |
+| cpu-openmp | CPU with OpenMP, 8 threads, `OMP_PLACES` set to `threads`, and `OMP_PROC_BIND` set to `spread` |
 | gpu-v100 | GPU on V100 |
 | gpu-a100 | GPU on A100 |
 | gpu-h100 | GPU on H100 |

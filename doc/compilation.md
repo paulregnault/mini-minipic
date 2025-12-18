@@ -13,7 +13,7 @@
 CMake would download an archive of Kokkos and decompress it in `external/kokkos` by default.
 
 ```bash
-git clone <url of the repo>
+git clone https://github.com/CExA-project/mini-minipic.git
 ```
 
 ### Method 2: Using a Git submodule
@@ -21,7 +21,7 @@ git clone <url of the repo>
 Git would clone the Kokkos repo in `external/kokkos` and switch to a stable branch.
 
 ```bash
-git clone --recurse-submodules <url of the repo>
+git clone --recurse-submodules https://github.com/CExA-project/mini-minipic.git
 ```
 
 If you have cloned without the submodules (i.e. `git clone <url of the repo>`):
@@ -52,7 +52,7 @@ Note that you need one build (and one installation directory) per backend and ar
 </details>
 
 ```bash
-git clone <url of the repo>
+git clone https://github.com/CExA-project/mini-minipic.git
 ```
 
 Then, you would need to tell CMake where to find Kokkos with `-DKokkos_ROOT=/path/to/kokkos/install`.
@@ -85,7 +85,7 @@ Project specific options:
 
 - `-DMINI_MINIPIC_DEBUG=<ON/OFF>`: enable/disable debug messages (`OFF` by default);
 - `-DMINI_MINIPIC_WARNING=<ON/OFF>`: enable/disable compiler warnings (add `-Wall`, `-Wextra`, and `-Wpedantic`, `OFF` by default);
-- `-DMINI_MINIPIC_KOKKOS_SCATTER_VIEW=<ON/OFF>`: use Kokkos scatter views for projection operator;
+- `-DMINI_MINIPIC_KOKKOS_SCATTER_VIEW=<ON/OFF>`: use Kokkos scatter views for projection operator (`OFF` by default);
 - `-DMINI_MINIPIC_IMPLEMENTATION=<implementation>`: which implementation to use (`exercise`,`kokkos`, or any directory with valid files, default to the former);
 - `-DMINI_MINIPIC_SETUP=<setup>`: which setup to build and run with (`antenna`, `b_cst`, `beam`, `e_cst`, `thermal`, default to the former);
 - `-DMINI_MINIPIC_KOKKOS_SOURCE_DIRECTORY=</path/to/kokkos/sources>`: Path to the local source directory of Kokkos (default to `./external/kokkos`).

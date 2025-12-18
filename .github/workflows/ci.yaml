@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        implementation:
+          - kokkos
+          - exercise
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.12
+          cache: "pip"
+      - name: Install libminipic
+        run: pip install .
+      - name: Prepare, build, run, verify
+        run: mini-run --config cpu-openmp --implementation ${{ matrix.implementation }}
+        env:
+          OMP_PROC_BIND: spread
+          OMP_PLACES: threads
