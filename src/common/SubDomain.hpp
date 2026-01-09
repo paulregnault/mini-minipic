@@ -98,7 +98,7 @@ public:
 
     // buffer to store the number of particles per cells per species
     // Needed for proper init with duplication
-    std::vector<int> particles_per_cell_counter(n_species * total_cells);
+    std::vector<std::size_t> particles_per_cell_counter(n_species * total_cells);
 
     for (std::size_t is = 0; is < n_species; is++) {
 

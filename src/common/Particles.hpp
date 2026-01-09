@@ -195,62 +195,37 @@ public:
     // A particle costs 112 octets
 
     // This corresponds to a gain of `min_threshold * 112` octets
-    const int min_threshold = 500000;
+    const std::size_t min_threshold = 500000;
 
     if (n_particles > n_particles_m || (n_particles_m - n_particles) > min_threshold) {
-
       Kokkos::resize(x_m, n_particles);
-      Kokkos::deep_copy(x_m, 0.);
       Kokkos::resize(x_h_m, n_particles);
-      Kokkos::deep_copy(x_h_m, 0.);
       Kokkos::resize(y_m, n_particles);
-      Kokkos::deep_copy(y_m, 0.);
       Kokkos::resize(y_h_m, n_particles);
-      Kokkos::deep_copy(y_h_m, 0.);
       Kokkos::resize(z_m, n_particles);
-      Kokkos::deep_copy(z_m, 0.);
       Kokkos::resize(z_h_m, n_particles);
-      Kokkos::deep_copy(z_h_m, 0.);
 
       Kokkos::resize(mx_m, n_particles);
-      Kokkos::deep_copy(mx_m, 0.);
       Kokkos::resize(mx_h_m, n_particles);
-      Kokkos::deep_copy(mx_h_m, 0.);
       Kokkos::resize(my_m, n_particles);
-      Kokkos::deep_copy(my_m, 0.);
       Kokkos::resize(my_h_m, n_particles);
-      Kokkos::deep_copy(my_h_m, 0.);
       Kokkos::resize(mz_m, n_particles);
-      Kokkos::deep_copy(mz_m, 0.);
       Kokkos::resize(mz_h_m, n_particles);
-      Kokkos::deep_copy(mz_h_m, 0.);
 
       if (with_electromagnetic_fields_m) {
         Kokkos::resize(Ex_m, n_particles);
-        Kokkos::deep_copy(Ex_m, 0.);
         Kokkos::resize(Ex_h_m, n_particles);
-        Kokkos::deep_copy(Ex_h_m, 0.);
         Kokkos::resize(Ey_m, n_particles);
-        Kokkos::deep_copy(Ey_m, 0.);
         Kokkos::resize(Ey_h_m, n_particles);
-        Kokkos::deep_copy(Ey_h_m, 0.);
         Kokkos::resize(Ez_m, n_particles);
-        Kokkos::deep_copy(Ez_m, 0.);
         Kokkos::resize(Ez_h_m, n_particles);
-        Kokkos::deep_copy(Ez_h_m, 0.);
 
         Kokkos::resize(Bx_m, n_particles);
-        Kokkos::deep_copy(Bx_m, 0.);
         Kokkos::resize(Bx_h_m, n_particles);
-        Kokkos::deep_copy(Bx_h_m, 0.);
         Kokkos::resize(By_m, n_particles);
-        Kokkos::deep_copy(By_m, 0.);
         Kokkos::resize(By_h_m, n_particles);
-        Kokkos::deep_copy(By_h_m, 0.);
         Kokkos::resize(Bz_m, n_particles);
-        Kokkos::deep_copy(Bz_m, 0.);
         Kokkos::resize(Bz_h_m, n_particles);
-        Kokkos::deep_copy(Bz_h_m, 0.);
       }
 
       // if (with_gamma_m) {
