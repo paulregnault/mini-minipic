@@ -22,13 +22,13 @@ void setup(Params &params) {
 
   // Cells per patch per direction
   params.nx_cells = 384 * 4;
-  params.ny_cells = 64 * 4;
-  params.nz_cells = 64 * 4;
+  params.ny_cells = 64 * 2;
+  params.nz_cells = 64 * 2;
 
   // Time
   params.dt = 0.95;
 
-  params.simulation_time = 600 * params.dt;
+  params.simulation_time = 200 * params.dt;
 
   // Antenna profile to generate a gaussian laser beam
   auto profile = [](double y, double z, double t) -> double {
