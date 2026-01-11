@@ -29,9 +29,9 @@ void setup(Params &params) {
   params.inf_x = 0.;
   params.inf_y = 0.;
   params.inf_z = 0.;
-  params.sup_x = 32 * 4 * dx;
-  params.sup_y = 32 * 4 *  dy;
-  params.sup_z = 32 * 4 * dz;
+  params.sup_x = 32 * dx * 4;
+  params.sup_y = 32 * dy * 4;
+  params.sup_z = 32 * dz * 4;
 
   params.nx_cells = static_cast<int>((params.sup_x - params.inf_x) / dx);
   params.ny_cells = static_cast<int>((params.sup_y - params.inf_y) / dy);
@@ -40,7 +40,7 @@ void setup(Params &params) {
   // Time
   params.dt = 0.9;
 
-  params.simulation_time = 500 * params.dt;
+  params.simulation_time = 200 * params.dt;
 
   // Species
 
@@ -55,14 +55,14 @@ void setup(Params &params) {
   };
 
   // Plasma
-  params.add_species("electron", 1, -1, temperature, profile, {v_drift, 0, 0}, 8 * 10, "random", "cell");
+  params.add_species("electron", 1, -1, temperature, profile, {v_drift, 0, 0}, 8 * 4, "random", "cell");
   params.add_species("proton",
                      1836.125,
                      1,
                      temperature,
                      profile,
                      {v_drift, 0, 0},
-                     8 * 10,
+                     8 * 4,
                      "electron",
                      "cell");
 
