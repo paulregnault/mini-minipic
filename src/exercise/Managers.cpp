@@ -10,7 +10,8 @@
 
 namespace managers {
 
-void initialize(const Params &params, ElectroMagn &em, std::vector<Particles> &particles) {
+void initialize(const Params &params, ElectroMagn &em,
+                std::vector<Particles> &particles) {
   // Momentum correction (to respect the leap frog scheme)
   if (params.momentum_correction) {
 
@@ -33,7 +34,8 @@ void initialize(const Params &params, ElectroMagn &em, std::vector<Particles> &p
   }
 }
 
-void iterate(const Params &params, ElectroMagn &em, std::vector<Particles> &particles, int it) {
+void iterate(const Params &params, ElectroMagn &em,
+             std::vector<Particles> &particles, int it) {
   if (params.current_projection || params.n_particles > 0) {
 
     DEBUG("  -> start reset current");
@@ -77,9 +79,8 @@ void iterate(const Params &params, ElectroMagn &em, std::vector<Particles> &part
 #if defined(MINI_MINIPIC_DEBUG)
   // check particles
   for (std::size_t is = 0; is < particles.size(); ++is) {
-    particles[is].check(inf_m[0], sup_m[0],
-                          inf_m[1], sup_m[1],
-                          inf_m[2], sup_m[2]);
+    particles[is].check(inf_m[0], sup_m[0], inf_m[1], sup_m[1], inf_m[2],
+                        sup_m[2]);
   }
 #endif
 
@@ -129,12 +130,10 @@ void iterate(const Params &params, ElectroMagn &em, std::vector<Particles> &part
     em.sync(minipic::device, minipic::host);
 
     // Generate a laser field with an antenna
-    for (std::size_t iantenna = 0; iantenna < params.antenna_profiles_m.size(); iantenna++) {
-      operators::antenna(params,
-                         em,
-                         params.antenna_profiles_m[iantenna],
-                         params.antenna_positions_m[iantenna],
-                         it * params.dt);
+    for (std::size_t iantenna = 0; iantenna < params.antenna_profiles_m.size();
+         iantenna++) {
+      operators::antenna(params, em, params.antenna_profiles_m[iantenna],
+                         params.antenna_positions_m[iantenna], it * params.dt);
     }
 
     // Solve the Maxwell equation

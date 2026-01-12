@@ -7,11 +7,19 @@ A list of setups can be found in the directory `src/setups/`.
 
 ## Description of existing setups
 
-- `thermal`: A thermalized plasma of 262144 protons and 262144 neutrons (524288 particles) in a domain of 32 × 32 × 32 (32.768 × 10<sup>3</sup>) cells;
-- `beam`: A beam of 17171 protons and 17171 neutrons (34342 particles) in a domain of 32 × 32 × 32 (32.768 × 10<sup>3</sup>) cells;
-- `antenna`: An antenna without particles in a domain of 384 × 64 × 64 (1.572864 × 10<sup>6</sup>) cells;
+### Small setups (default set)
+
+- `thermal`: A thermalized plasma of 262144 protons and 262144 neutrons (524288 particles) in a domain of 32 × 32 × 32 (33 × 10<sup>3</sup>) cells;
+- `beam`: A beam of 17171 protons and 17171 neutrons (34342 particles) in a domain of 32 × 32 × 32 (33 × 10<sup>3</sup>) cells;
+- `antenna`: An antenna without particles in a domain of 384 × 64 × 64 (1.6 × 10<sup>6</sup>) cells;
 - `e_cst`: A constant electric field in a domain of 32 × 32 × 32 (32.768 × 10<sup>3</sup>) cells;
 - `b_cst`: A constant magnetic field in a domain of 32 × 32 × 32 (32.768 × 10<sup>3</sup>) cells.
+
+### Heavy setups
+
+- `thermal_heavy`: A thermalized plasma of 14 × 10<sup>6</sup> protons and 14 × 10<sup>6</sup>neutrons (28 × 10<sup>6</sup> particles) in a domain of 96 × 96 × 96 (885 × 10<sup>3</sup>) cells;
+- `beam_heavy`: A beam of 4 × 10<sup>6</sup> protons and 4 × 10<sup>6</sup> neutrons (8 × 10<sup>6</sup> particles) in a domain of 128 × 128 × 128 (2 × 10<sup>6</sup>) cells;
+- `antenna_heavy`: An antenna without particles in a domain of 1536 × 128 × 128 (25) × 10<sup>6</sup>) cells;
 
 ## Setup API
 
