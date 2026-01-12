@@ -38,8 +38,7 @@ Even better, you can use a virtual environment.
 </summary>
 
 ```sh
-pip install --user virtualenv
-virtualenv --python python<x.y> $PWD/venv
+python3 -m virtualenv --python python<x.y> $PWD/venv
 source venv/bin/activate
 pip install .
 ```
