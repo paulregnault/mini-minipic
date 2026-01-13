@@ -297,13 +297,16 @@ void push(std::vector<Particles> &particles, double dt) {
 //! \param[in] dt Time step to use for the pusher.
 void push_momentum(std::vector<Particles> &particles, double dt) {
   // for each species
+  // small number, not priority to parallelize
   for (std::size_t is = 0; is < particles.size(); is++) {
 
     const std::size_t n_particles = particles[is].size();
 
     // q' = dt * (q/2m)
     const double qp = particles[is].charge_m * dt * 0.5 / particles[is].mass_m;
-
+    //Kokkos::parallel_for(
+    //"push_momentum_loop_2",
+    // ExecutionPolicy(
     for (std::size_t ip = 0; ip < n_particles; ++ip) {
       // 1/2 E
       double px = qp * particles[is].Ex_h_m(ip);
