@@ -734,23 +734,23 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
 
   // Electric field Ex (d,p,p)
 
-  Kokkos::parallel_for(
-  mdrange_policy({0, 0, 0}, {em.nx_d_m, em.ny_p_m,em.nz_p_m}),
-  KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-    Ex(ix, iy, iz) += -dt * Jx_p(ix, iy + 1, iz + 1) +
-                          dt_over_dy * (Bz_p(ix, iy + 1, iz) - Bz_p(ix, iy, iz)) -
-                          dt_over_dz * (By_p(ix, iy, iz + 1) - By_p(ix, iy, iz));
-  });
+  // Kokkos::parallel_for(
+  // mdrange_policy({0, 0, 0}, {em.nx_d_m, em.ny_p_m,em.nz_p_m}),
+  // KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
+  //   Ex(ix, iy, iz) += -dt * Jx_p(ix, iy + 1, iz + 1) +
+  //                         dt_over_dy * (Bz_p(ix, iy + 1, iz) - Bz_p(ix, iy, iz)) -
+  //                         dt_over_dz * (By_p(ix, iy, iz + 1) - By_p(ix, iy, iz));
+  // });
 
-  // for (int ix = 0; ix < em.nx_d_m; ++ix) {
-  //   for (int iy = 0; iy < em.ny_p_m; ++iy) {
-  //     for (int iz = 0; iz < em.nz_p_m; ++iz) {
-  //       Ex(ix, iy, iz) += -dt * em.Jx_h_m(ix, iy + 1, iz + 1) +
-  //                         dt_over_dy * (Bz(ix, iy + 1, iz) - Bz(ix, iy, iz)) -
-  //                         dt_over_dz * (By(ix, iy, iz + 1) - By(ix, iy, iz));
-  //     }
-  //   }
-  // }
+  for (int ix = 0; ix < em.nx_d_m; ++ix) {
+    for (int iy = 0; iy < em.ny_p_m; ++iy) {
+      for (int iz = 0; iz < em.nz_p_m; ++iz) {
+        Ex(ix, iy, iz) += -dt * em.Jx_h_m(ix, iy + 1, iz + 1) +
+                          dt_over_dy * (Bz(ix, iy + 1, iz) - Bz(ix, iy, iz)) -
+                          dt_over_dz * (By(ix, iy, iz + 1) - By(ix, iy, iz));
+      }
+    }
+  }
 
   // Electric field Ey (p,d,p)
   for (int ix = 0; ix < em.nx_p_m; ++ix) {
