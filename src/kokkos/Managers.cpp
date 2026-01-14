@@ -2,6 +2,7 @@
 //! \file Managers.cpp
 
 //! \brief Management of the operators
+//! \author Mike Petrault, Juan , Paul
 
 /* _____________________________________________________________________ */
 
