@@ -815,7 +815,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   // Magnetic field Bx (p,d,d)
   
   Kokkos::parallel_for(
-  mdrange_policy({0, 0, 0}, {em.nx_p_m, em.ny_d_m,em.nz_d_m}),
+  mdrange_policy({0, 1, 1}, {em.nx_p_m, em.ny_d_m-1, em.nz_d_m-1}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
     Bx_p(ix, iy, iz) += -dt_over_dy * (Ez_p(ix, iy, iz) - Ez_p(ix, iy - 1, iz)) +
                           dt_over_dz * (Ey_p(ix, iy, iz) - Ey_p(ix, iy, iz - 1));
@@ -832,7 +832,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
 
   // Magnetic field By (d,p,d)
   Kokkos::parallel_for(
-  mdrange_policy({0, 0, 0}, {em.nx_d_m, em.ny_p_m,em.nz_d_m}),
+  mdrange_policy({1, 0, 1}, {em.nx_d_m-1, em.ny_p_m,em.nz_d_m-1}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
    By_p(ix, iy, iz) += -dt_over_dz * (Ex_p(ix, iy, iz) - Ex_p(ix, iy, iz - 1)) +
                           dt_over_dx * (Ez_p(ix, iy, iz) - Ez_p(ix - 1, iy, iz));
@@ -850,7 +850,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   // Magnetic field Bz (d,d,p)
 
   Kokkos::parallel_for(
-  mdrange_policy({0, 0, 0}, {em.nx_d_m, em.ny_d_m,em.nz_p_m}),
+  mdrange_policy({1, 1, 0}, {em.nx_d_m-1, em.ny_d_m-1,em.nz_p_m}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
     Bz_p(ix, iy, iz) += -dt_over_dx * (Ey_p(ix, iy, iz) - Ey_p(ix - 1, iy, iz)) +
                           dt_over_dy * (Ex_p(ix, iy, iz) - Ex_p(ix, iy - 1, iz));
