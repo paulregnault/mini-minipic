@@ -127,9 +127,9 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
       //const double iyn = particles[is].y_h_m(part) * em.inv_dy_m;
       //const double izn = particles[is].z_h_m(part) * em.inv_dz_m;
 
-      const double ixn = x_m(part) * em_inv_dx;
-      const double iyn = y_m(part) * em_inv_dy;
-      const double izn = z_m(part) * em_inv_dz;
+      const double ixn = x(part) * em_inv_dx;
+      const double iyn = y(part) * em_inv_dy;
+      const double izn = z(part) * em_inv_dz;
 
       // Compute indexes in global primal grid
       const unsigned int ixp = floor(ixn);
