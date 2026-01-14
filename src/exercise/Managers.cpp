@@ -110,8 +110,6 @@ void iterate(const Params &params, ElectroMagn &em,
 
   if (params.maxwell_solver) {
 
-    //em.sync(minipic::device, minipic::host);
-
     // Generate a laser field with an antenna
     for (std::size_t iantenna = 0; iantenna < params.antenna_profiles_m.size();
          iantenna++) {
@@ -119,21 +117,14 @@ void iterate(const Params &params, ElectroMagn &em,
                          params.antenna_positions_m[iantenna], it * params.dt);
     }
 
-    em.sync(minipic::device, minipic::host);
-
     // Solve the Maxwell equation
     DEBUG("  -> start solve Maxwell")
-
-    em.sync(minipic::host, minipic::device);
 
     operators::solve_maxwell(params, em);
 
     em.sync(minipic::device, minipic::host);
 
-
     DEBUG("  -> stop solve Maxwell")
-
-    // em.sync(minipic::host, minipic::device);
 
     // Boundary conditions on EM fields
     DEBUG("  -> start solve BC")
