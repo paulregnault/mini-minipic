@@ -87,9 +87,9 @@ void iterate(const Params &params, ElectroMagn &em,
   // Projection in local field
   if (params.current_projection) {
 
-    for (std::size_t is = 0; is < particles.size(); ++is) {
-      particles[is].sync(minipic::device, minipic::host);
-    }
+    //for (std::size_t is = 0; is < particles.size(); ++is) {
+    //  particles[is].sync(minipic::device, minipic::host);
+    //}
 
     // Projection directly in the global grid
     DEBUG("  ->  start projection");
@@ -99,7 +99,7 @@ void iterate(const Params &params, ElectroMagn &em,
     DEBUG("  ->  stop projection");
 
     for (std::size_t is = 0; is < particles.size(); ++is) {
-      particles[is].sync(minipic::host, minipic::device);
+      particles[is].sync(minipic::device, minipic::host);
     }
   }
 
