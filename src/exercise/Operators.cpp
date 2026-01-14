@@ -256,14 +256,20 @@ void push(std::vector<Particles> &particles, double dt) {
     Kokkos::parallel_for(
 	n_particles, 
 	KOKKOS_LAMBDA(const int ip){
-      		// 1/2 E
-      		double px = qp * particles[is].Ex_h_m(ip);
-      		double py = qp * particles[is].Ey_h_m(ip);
-      		double pz = qp * particles[is].Ez_h_m(ip);
 
-      		const double ux = particles[is].mx_h_m(ip) + px;
-      		const double uy = particles[is].my_h_m(ip) + py;
-      		const double uz = particles[is].mz_h_m(ip) + pz;
+		double *E[3] = {&Ex(ip), &Ey(ip), &Ez(ip)};
+		double *m[3] = {&mx(ip), &my(ip), &mz(ip)};
+		double *B[3] = {&Bx(ip), &By(ip), &Bz(ip)};
+		double *pos[3] = {&x(ip), &y(ip), &z(ip)};
+
+      		// 1/2 E
+      		double px = *E[0] * qp;
+      		double py = *E[1] * qp;
+      		double pz = *E[2] * qp;
+
+      		const double ux = *m[0] + px;
+      		const double uy = *m[1] + py;
+      		const double uz = *m[2] + pz;
 
       		// gamma-factor
       		double usq = (ux * ux + uy * uy + uz * uz);
@@ -271,9 +277,9 @@ void push(std::vector<Particles> &particles, double dt) {
       		double gamma_inv = qp / gamma;
 
       		// B, T = Transform to rotate the particle
-      		const double tx = gamma_inv * particles[is].Bx_h_m(ip);
-      		const double ty = gamma_inv * particles[is].By_h_m(ip);
-      		const double tz = gamma_inv * particles[is].Bz_h_m(ip);
+      		const double tx = *B[0] * gamma_inv;
+      		const double ty = *B[1] * gamma_inv;
+      		const double tz = *B[2] * gamma_inv;
       		const double tsq = 1. + (tx * tx + ty * ty + tz * tz);
       		double tsq_inv = 1. / tsq;
 
@@ -298,14 +304,14 @@ void push(std::vector<Particles> &particles, double dt) {
       		gamma_inv = 1 / gamma;
 
       		// Update momentum
-      		particles[is].mx_h_m(ip) = px;
-      		particles[is].my_h_m(ip) = py;
-      		particles[is].mz_h_m(ip) = pz;
+      		*m[0] = px;
+      		*m[1] = py;
+      		*m[2] = pz;
 
       		// Update positions
-      		particles[is].x_h_m(ip) += particles[is].mx_h_m(ip) * dt * gamma_inv;
-      		particles[is].y_h_m(ip) += particles[is].my_h_m(ip) * dt * gamma_inv;
-      		particles[is].z_h_m(ip) += particles[is].mz_h_m(ip) * dt * gamma_inv;
+      		*pos[0] += *m[0] * dt * gamma_inv;
+      		*pos[1] += *m[1] * dt * gamma_inv;
+      		*pos[2] += *m[2] * dt * gamma_inv;
     	} //End loop on particles
   );
 
