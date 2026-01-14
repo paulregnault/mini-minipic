@@ -574,6 +574,9 @@ void project(const Params &params, ElectroMagn &em,
       		    (coeffs[0]) * (coeffs[1]) * (coeffs[2]) * Jzp;
     	}// end for each particles
     );
+
+    Kokkos::fence();
+
   }   // end for each species
 }
 
