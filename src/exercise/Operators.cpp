@@ -729,7 +729,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
     mdrange_policy({0, 0, 0}, {em.nx_d_m, em.ny_p_m,em.nz_p_m}),
     // mdrange_policy({0, 0, 0}, {nx_d, ny_p, nz_p}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-    Ex(ix, iy, iz) += -dt * Jx_p(ix, iy + 1, iz + 1) +
+    Ex(ix, iy, iz) += -dt * Jx(ix, iy + 1, iz + 1) +
                           dt_over_dy * (Bz(ix, iy + 1, iz) - Bz(ix, iy, iz)) -
                           dt_over_dz * (By(ix, iy, iz + 1) - By(ix, iy, iz));
   });
@@ -753,7 +753,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   Kokkos::parallel_for(
   mdrange_policy({0, 0, 0}, {em.nx_p_m, em.ny_d_m,em.nz_p_m}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-   Ey(ix, iy, iz) += -dt * Jy_p(ix + 1, iy, iz + 1) -
+   Ey(ix, iy, iz) += -dt * Jy(ix + 1, iy, iz + 1) -
                           dt_over_dx * (Bz(ix + 1, iy, iz) - Bz(ix, iy, iz)) +
                           dt_over_dz * (Bz(ix, iy, iz + 1) - Bz(ix, iy, iz));
   });
@@ -775,7 +775,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   Kokkos::parallel_for(
   mdrange_policy({0, 0, 0}, {em.nx_p_m, em.ny_p_m,em.nz_d_m}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-    Ez(ix, iy, iz) += -dt * Jz_p(ix + 1, iy + 1, iz) +
+    Ez(ix, iy, iz) += -dt * Jz(ix + 1, iy + 1, iz) +
                           dt_over_dx * (By(ix + 1, iy, iz) - By(ix, iy, iz)) -
                           dt_over_dy * (Bz(ix, iy + 1, iz) - Bz(ix, iy, iz));
   });
