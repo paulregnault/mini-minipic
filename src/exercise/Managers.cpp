@@ -66,7 +66,7 @@ void iterate(const Params &params, ElectroMagn &em,
 
   em.sync(minipic::host, minipic::device);
   for (std::size_t is = 0; is < particles.size(); ++is) {
-    particles[is].sync(minipic::host, minipic::device);
+    particles[is].sync(minipic::device, minipic::host);
   }
 
   // Do boundary conditions on global domain
