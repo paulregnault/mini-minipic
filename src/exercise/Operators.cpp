@@ -1134,6 +1134,9 @@ void antenna(const Params &params, ElectroMagn &em,
   const int ix = std::floor(
       (x - params.inf_x - em.J_dual_zx_m * 0.5 * params.dx) / params.dx);
 
+  const double yfs = 0.5 * params.Ly + params.inf_y;
+  const double zfs = 0.5 * params.Lz + params.inf_z;
+
   for (std::size_t iy = 0; iy < J->extent(1); ++iy) {
     for (std::size_t iz = 0; iz < J->extent(2); ++iz) {
 
@@ -1142,9 +1145,10 @@ void antenna(const Params &params, ElectroMagn &em,
       const double z =
           (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
 
-      (*J)(ix, iy, iz) = profile(y, z, t); 
+      (*J)(ix, iy, iz) = profile(y, z, t);
     }
   }
 } // end antenna
+
 
 } // end namespace operators
