@@ -237,21 +237,21 @@ void push(std::vector<Particles> &particles, double dt) {
     const double qp = particles[is].charge_m * dt * 0.5 / particles[is].mass_m;
 
     //Create view to access particle data from device
-    Particles::view_t x = particles[is].x_h_m;
-    Particles::view_t y = particles[is].y_h_m;
-    Particles::view_t z = particles[is].z_h_m;
+    Particles::view_t x = particles[is].x_m;
+    Particles::view_t y = particles[is].y_m;
+    Particles::view_t z = particles[is].z_m;
 
-    Particles::view_t Ex = particles[is].Ex_h_m;
-    Particles::view_t Ey = particles[is].Ey_h_m;
-    Particles::view_t Ez = particles[is].Ez_h_m;
+    Particles::view_t Ex = particles[is].Ex_m;
+    Particles::view_t Ey = particles[is].Ey_m;
+    Particles::view_t Ez = particles[is].Ez_m;
 
-    Particles::view_t mx = particles[is].mx_h_m;
-    Particles::view_t my = particles[is].my_h_m;
-    Particles::view_t mz = particles[is].mz_h_m;
+    Particles::view_t mx = particles[is].mx_m;
+    Particles::view_t my = particles[is].my_m;
+    Particles::view_t mz = particles[is].mz_m;
 
-    Particles::view_t Bx = particles[is].Bx_h_m;
-    Particles::view_t By = particles[is].By_h_m;
-    Particles::view_t Bz = particles[is].Bz_h_m;
+    Particles::view_t Bx = particles[is].Bx_m;
+    Particles::view_t By = particles[is].By_m;
+    Particles::view_t Bz = particles[is].Bz_m;
 
     Kokkos::parallel_for(
 	n_particles, 
