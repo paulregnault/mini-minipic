@@ -98,9 +98,9 @@ void iterate(const Params &params, ElectroMagn &em,
 
     DEBUG("  ->  stop projection");
 
-    for (std::size_t is = 0; is < particles.size(); ++is) {
-      particles[is].sync(minipic::device, minipic::host);
-    }
+    //for (std::size_t is = 0; is < particles.size(); ++is) {
+    //  particles[is].sync(minipic::device, minipic::host);
+    //}
   }
 
   // __________________________________________________________________
@@ -108,10 +108,10 @@ void iterate(const Params &params, ElectroMagn &em,
 
   if (params.current_projection || params.n_particles > 0) {
 
-    em.sync(minipic::host, minipic::device);
-    for (std::size_t is = 0; is < particles.size(); ++is) {
-      particles[is].sync(minipic::host, minipic::device);
-    }
+    //em.sync(minipic::host, minipic::device);
+    //for (std::size_t is = 0; is < particles.size(); ++is) {
+    //  particles[is].sync(minipic::host, minipic::device);
+    //}
 
     // Perform the boundary conditions for current
     DEBUG("  -> start current BC")
