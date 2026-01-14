@@ -865,6 +865,9 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   //   }
   // }
 
+  Kokkos::fence("maxwell2"); //check
+
+
 } // end solve
 
 //! \brief Boundaries condition on the global grid.
