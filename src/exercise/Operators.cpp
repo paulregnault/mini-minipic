@@ -1110,8 +1110,10 @@ void solveBC(const Params &params, ElectroMagn &em) {
 void antenna(const Params &params, ElectroMagn &em,
              std::function<double(double, double, double)> profile, double x,
              double t) {
-
-  ElectroMagn::hostview_t *J = &em.Jz_h_m;
+  typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>
+      mdrange_policy;
+  
+  ElectroMagn::view_t J = em.Jz_m;
 
   const int ix = std::floor(
       (x - params.inf_x - em.J_dual_zx_m * 0.5 * params.dx) / params.dx);
@@ -1119,17 +1121,58 @@ void antenna(const Params &params, ElectroMagn &em,
   const double yfs = 0.5 * params.Ly + params.inf_y;
   const double zfs = 0.5 * params.Lz + params.inf_z;
 
-  for (std::size_t iy = 0; iy < J->extent(1); ++iy) {
-    for (std::size_t iz = 0; iz < J->extent(2); ++iz) {
+  // Intensity
+  const double E0 = 1;
+  
+  // Full width at half maximum of the focal spot
+  const double fwhm_focal_spot = 0.1;
+  
+  // Period of a laser oscillation
+  const double period = 0.05;
+  
+  // Full width at half maximum of the time envelope
+  const double fwhm_time = 0.5;
+  
+  // Time at maximum intensity
+  const double t0 = 0.75;
+  
+  // Compute the waist of the focal spot
+  const double waist_focal_spot_square = fwhm_focal_spot * fwhm_focal_spot / (2.0 * std::log(2.0));
 
-      const double y =
-          (iy - em.J_dual_zy_m * 0.5) * params.dy + params.inf_y - yfs;
-      const double z =
-          (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
+  // Compute the waist of the time envelope
+  const double waist_time_square = fwhm_time * fwhm_time / (2.0 * std::log(2.0));
+  
+  const double alpha = 1. / waist_time_square;
+  const double beta  = 2 * M_PI / period;
+  const double trel  = t - t0;
 
-      (*J)(ix, iy, iz) = profile(y, z, t);
-    }
-  }
+  const int J_d_zy = em.J_dual_zy_m;
+  const int J_d_zz = em.J_dual_zz_m;
+
+  const double dy = params.dy;
+  const double dz = params.dz;
+  const double inf_y = params.inf_y;
+  const double inf_z = params.inf_z;
+
+  Kokkos::parallel_for (
+	mdrange_policy({0,0}, {J.extent(1),J.extent(2)}),
+	KOKKOS_LAMBDA(std::size_t iy, std::size_t iz){
+      		const double y =
+      		    (iy - J_d_zy * 0.5) * dy + inf_y - yfs;
+      		const double z =
+      		    (iz - J_d_zz * 0.5) * dz + inf_z - zfs;
+		const double focal_spot = 
+		    std::exp(-(y * y + z * z) / (waist_focal_spot_square));
+
+		// Derivative of a E field of the form E0 * exp(-alpha * t^2) * cos(beta * t)
+      		J(ix, iy, iz) = E0 * std::exp(-alpha * trel * trel) *
+           			   (beta * std::cos(beta * trel) - 
+				   2 * alpha * trel * sin(beta * trel)) * focal_spot;
+
+  	}
+  );
+
+  Kokkos::fence();
 } // end antenna
 
 } // end namespace operators
