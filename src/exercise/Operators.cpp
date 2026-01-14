@@ -458,9 +458,9 @@ void project(const Params &params, ElectroMagn &em,
     Kokkos::parallel_for (
 	n_particles, 
 	KOKKOS_LAMBDA(const int ip) {
-                *pos[3] = {&x(ip), &y(ip), &z(ip)};
-		*m[3] = {&mx(ip), &my(ip), &mz(ip)};
-                *weight_p = &weight(ip)
+                double *pos[3] = {&x(ip), &y(ip), &z(ip)};
+		double *m[3] = {&mx(ip), &my(ip), &mz(ip)};
+                double *weight_p = &weight(ip)
 
       		// Delete if already compute by Pusher
       		const double charge_weight =
