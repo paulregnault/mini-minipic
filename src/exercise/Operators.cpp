@@ -570,9 +570,9 @@ void project(const Params &params, ElectroMagn &em,
 
     Particles::view_t weight = particles[is].weight_m;
 
-    ElectroMagn::view_t Jx = em.Jx_m;
-    ElectroMagn::view_t Jy = em.Jy_m;
-    ElectroMagn::view_t Jz = em.Jz_m;
+    Kokkos::View<double ***, MemoryTraits<Atomic> > Jx = em.Jx_m;
+    Kokkos::View<double ***, MemoryTraits<Atomic> > Jy = em.Jy_m;
+    Kokkos::View<double ***, MemoryTraits<Atomic> > Jz = em.Jz_m;
 
     Kokkos::parallel_for (
 	n_particles, 
