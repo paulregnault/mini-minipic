@@ -128,7 +128,7 @@ void iterate(const Params &params, ElectroMagn &em,
 
     DEBUG("  -> stop solve Maxwell")
 
-    em.sync(minipic::host, minipic::device);
+    // em.sync(minipic::host, minipic::device);
 
     // Boundary conditions on EM fields
     DEBUG("  -> start solve BC")
