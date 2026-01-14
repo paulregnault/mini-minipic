@@ -80,6 +80,10 @@ double sum_power(ElectroMagn::view_t v, const int power) {
 //! particles  vector of particle species
 void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
 
+  const double em_inv_dx = em.inv_dx_m;
+  const double em_inv_dy = em.inv_dy_m;
+  const double em_inv_dz = em.inv_dz_m;
+
   for (std::size_t is = 0; is < particles.size(); is++) {
 
     const std::size_t n_particles = particles[is].size();
@@ -100,13 +104,17 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
     ElectroMagn::view_t By =  em.By_m;
     ElectroMagn::view_t Bz =  em.Bz_m;
 
+    Particles::view_t pEx = particles[is].Ex_m;  //remove Ex_h_m
+    Particles::view_t pEy = particles[is].Ey_m;
+    Particles::view_t pEz = particles[is].Ez_m;
+    
+    Particles::view_t pBx =  particles[is].Bx_m;  //remove _h_m
+    Particles::view_t pBy =  particles[is].By_m;
+    Particles::view_t pBz =  particles[is].Bz_m;
+    
     Particles::view_t x = particles[is].x_m;
     Particles::view_t y = particles[is].y_m;
     Particles::view_t z = particles[is].z_m;
-
-    const double em_inv_dx = em.inv_dx_m;
-    const double em_inv_dy = em.inv_dy_m;
-    const double em_inv_dz = em.inv_dz_m;
         
     Kokkos::parallel_for(
     "interpolation_loop",
@@ -152,7 +160,7 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
         const double v1 = v01 * (1 - coeffs[1]) + v11 * coeffs[1];
 
         //particles[is].Ex_h_m(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
-        Ex(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
+        pEx(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
         
       }
 
@@ -172,7 +180,7 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
         const double v1 = v01 * (1 - coeffs[1]) + v11 * coeffs[1];
 
         //particles[is].Ey_h_m(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
-        Ey(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
+        pEy(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
       }
 
       // Ez (p, p, d)
@@ -191,7 +199,7 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
         const double v1 = v01 * (1 - coeffs[1]) + v11 * coeffs[1];
 
         //particles[is].Ez_h_m(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
-        Ez(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
+        pEz(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
       }
 
       // interpolation magnetic field
@@ -211,7 +219,7 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
         const double v1 = v01 * (1 - coeffs[1]) + v11 * coeffs[1];
 
         //particles[is].Bx_h_m(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
-        Bx(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
+        pBx(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
       }
 
       // By (d, p, d)
@@ -230,7 +238,7 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
         const double v1 = v01 * (1 - coeffs[1]) + v11 * coeffs[1];
 
         //particles[is].By_h_m(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
-        By(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
+        pBy(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
       }
 
       // Bz (d, d, p)
@@ -249,7 +257,7 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
         const double v1 = v01 * (1 - coeffs[1]) + v11 * coeffs[1];
 
         //particles[is].Bz_h_m(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
-        Bz(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
+        pBz(part) = v0 * (1 - coeffs[2]) + v1 * coeffs[2];
       }
       
     } // end for particles
