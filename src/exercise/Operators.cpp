@@ -441,6 +441,11 @@ void project(const Params &params, ElectroMagn &em,
     const double inv_cell_volume_x_q =
         params.inv_cell_volume * particles[is].charge_m;
 
+    const double dt = params.dt;
+    const double inv_dx = params.inv_dx;
+    const double inv_dy = params.inv_dy;
+    const double inv_dz = params.inv_dz;
+
     Particles::view_t mx = particles[is].mx_m;
     Particles::view_t my = particles[is].my_m;
     Particles::view_t mz = particles[is].mz_m;
@@ -484,11 +489,11 @@ void project(const Params &params, ElectroMagn &em,
       		// current grids have 2 additional ghost cells (1 the min and 1 at the max
       		// border) when the direction is primal
       		const double posxn =
-          		(*pos[0] - 0.5 * params.dt * vx) * params.inv_dx + 1;
+          		(*pos[0] - 0.5 * dt * vx) * inv_dx + 1;
       		const double posyn =
-          		(*pos[1] - 0.5 * params.dt * vy) * params.inv_dy + 1;
+          		(*pos[1] - 0.5 * dt * vy) * inv_dy + 1;
       		const double poszn =
-          		(*pos[2] - 0.5 * params.dt * vz) * params.inv_dz + 1;
+          		(*pos[2] - 0.5 * dt * vz) * inv_dz + 1;
 
       		// Compute indexes in primal grid
       		const int ixp = (int)(std::floor(posxn));
