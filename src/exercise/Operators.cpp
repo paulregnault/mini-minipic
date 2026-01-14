@@ -313,6 +313,10 @@ void push_momentum(std::vector<Particles> &particles, double dt) {
     Particles::view_t my = particles[is].my_m;
     Particles::view_t mz = particles[is].mz_m;
 
+    Particles::view_t Bx =  particles[is].Bx_m;  //remove _h_m
+    Particles::view_t By =  particles[is].By_m;
+    Particles::view_t Bz =  particles[is].Bz_m;
+
 
     //pointer ?
     Kokkos::parallel_for(
@@ -347,9 +351,13 @@ void push_momentum(std::vector<Particles> &particles, double dt) {
       double gamma_inv = qp / gamma;
 
       // B, T = Transform to rotate the particle
-      const double tx = gamma_inv * particles[is].Bx_m(ip);  //remove _h_m
-      const double ty = gamma_inv * particles[is].By_m(ip);
-      const double tz = gamma_inv * particles[is].Bz_m(ip);
+      // const double tx = gamma_inv * particles[is].Bx_m(ip);  //remove _h_m
+      // const double ty = gamma_inv * particles[is].By_m(ip);
+      // const double tz = gamma_inv * particles[is].Bz_m(ip);
+      const double tx = gamma_inv * Bx(ip);  //remove _h_m
+      const double ty = gamma_inv * By(ip);
+      const double tz = gamma_inv * Bz(ip);
+
       const double tsq = 1. + (tx * tx + ty * ty + tz * tz);
       double tsq_inv = 1. / tsq;
 
