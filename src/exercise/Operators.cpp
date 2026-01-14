@@ -727,13 +727,13 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   ElectroMagn::view_t Jy_p = em.Jy_m;  
   ElectroMagn::view_t Jz_p = em.Jz_m;  
 
-  const auto nx_d = em.nx_d_m;
-  const auto ny_d = em.ny_d_m;
-  const auto nz_d = em.nz_d_m;
+  // const auto nx_d = em.nx_d_m;
+  // const auto ny_d = em.ny_d_m;
+  // const auto nz_d = em.nz_d_m;
 
-  const auto nx_p = em.nx_p_m;
-  const auto ny_p = em.ny_p_m;
-  const auto nz_p = em.nz_p_m;
+  // const auto nx_p = em.nx_p_m;
+  // const auto ny_p = em.ny_p_m;
+  // const auto nz_p = em.nz_p_m;
 
 
   typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace,
@@ -750,6 +750,11 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
                           dt_over_dy * (Bz_p(ix, iy + 1, iz) - Bz_p(ix, iy, iz)) -
                           dt_over_dz * (By_p(ix, iy, iz + 1) - By_p(ix, iy, iz));
   });
+
+  Kokkos::fence("maxwell"); //check
+  em.sync(minipic::device, minipic::host);
+
+
 
   // for (int ix = 0; ix < em.nx_d_m; ++ix) {
   //   for (int iy = 0; iy < em.ny_p_m; ++iy) {
