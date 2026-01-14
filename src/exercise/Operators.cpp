@@ -751,10 +751,10 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
                           dt_over_dz * (By_p(ix, iy, iz + 1) - By_p(ix, iy, iz));
   });
 
-  Kokkos::fence("maxwell"); //check
-  em.sync(minipic::device, minipic::host);
+  // Kokkos::fence("maxwell"); //check
+  // em.sync(minipic::device, minipic::host);
 
-
+  //Ex works
 
   // for (int ix = 0; ix < em.nx_d_m; ++ix) {
   //   for (int iy = 0; iy < em.ny_p_m; ++iy) {
@@ -767,15 +767,26 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   // }
 
   // Electric field Ey (p,d,p)
-  for (int ix = 0; ix < em.nx_p_m; ++ix) {
-    for (int iy = 0; iy < em.ny_d_m; ++iy) {
-      for (int iz = 0; iz < em.nz_p_m; ++iz) {
-        Ey(ix, iy, iz) += -dt * em.Jy_h_m(ix + 1, iy, iz + 1) -
-                          dt_over_dx * (Bz(ix + 1, iy, iz) - Bz(ix, iy, iz)) +
-                          dt_over_dz * (Bx(ix, iy, iz + 1) - Bx(ix, iy, iz));
-      }
-    }
-  }
+  Kokkos::parallel_for(
+  mdrange_policy({0, 0, 0}, {em.nx_p_m, em.ny_d_m,em.nz_p_m}),
+  KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
+   Ey_p(ix, iy, iz) += -dt * Jy_p(ix + 1, iy, iz + 1) -
+                          dt_over_dx * (Bz_p(ix + 1, iy, iz) - Bz_p(ix, iy, iz)) +
+                          dt_over_dz * (Bx_p(ix, iy, iz + 1) - Bx_p(ix, iy, iz));
+  });
+
+  // for (int ix = 0; ix < em.nx_p_m; ++ix) {
+  //   for (int iy = 0; iy < em.ny_d_m; ++iy) {
+  //     for (int iz = 0; iz < em.nz_p_m; ++iz) {
+  //       Ey(ix, iy, iz) += -dt * em.Jy_h_m(ix + 1, iy, iz + 1) -
+  //                         dt_over_dx * (Bz(ix + 1, iy, iz) - Bz(ix, iy, iz)) +
+  //                         dt_over_dz * (Bx(ix, iy, iz + 1) - Bx(ix, iy, iz));
+  //     }
+  //   }
+  // }
+
+  Kokkos::fence("maxwell"); //check
+  em.sync(minipic::device, minipic::host);
 
   // Electric field Ez (p,p,d)
 
