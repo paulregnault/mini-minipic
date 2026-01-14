@@ -304,19 +304,42 @@ void push_momentum(std::vector<Particles> &particles, double dt) {
 
     // q' = dt * (q/2m)
     const double qp = particles[is].charge_m * dt * 0.5 / particles[is].mass_m;
+
+    Particles::view_t Ex = particles[is].Ex_m;  //remove Ex_h_m
+    Particles::view_t Ey = particles[is].Ey_m;
+    Particles::view_t Ez = particles[is].Ez_m;
+    
+    Particles::view_t mx = particles[is].mx_m;
+    Particles::view_t my = particles[is].my_m;
+    Particles::view_t mz = particles[is].mz_m;
+
+
+    //pointer ?
     Kokkos::parallel_for(
-    "push_momentum_loop_2",
+    "push_momentum_loop_particles",
     n_particles,
     KOKKOS_LAMBDA (int ip) {
     // for (std::size_t ip = 0; ip < n_particles; ++ip) {
       // 1/2 E
-      double px = qp * particles[is].Ex_h_m(ip);
-      double py = qp * particles[is].Ey_h_m(ip);
-      double pz = qp * particles[is].Ez_h_m(ip);
 
-      const double ux = particles[is].mx_h_m(ip) + px;
-      const double uy = particles[is].my_h_m(ip) + py;
-      const double uz = particles[is].mz_h_m(ip) + pz;
+     
+    // double *pos[3] = {&x(part), &y(part), &z(part)};
+
+      // double px = qp * particles[is].Ex_m(ip); //remove Ex_h_m , () operator gives pointer ?
+      // double py = qp * particles[is].Ey_m(ip);
+      // double pz = qp * particles[is].Ez_m(ip);
+
+      // const double ux = particles[is].mx_m(ip) + px; //remove _h_m
+      // const double uy = particles[is].my_m(ip) + py;
+      // const double uz = particles[is].mz_m(ip) + pz;
+
+      double px = qp * Ex(ip); //remove Ex_h_m , () operator gives pointer ?
+      double py = qp * Ey(ip);
+      double pz = qp * Ez(ip);
+
+      const double ux = mx(ip) + px; //remove _h_m
+      const double uy = my(ip) + py;
+      const double uz = mz(ip) + pz;
 
       // gamma-factor
       double usq = (ux * ux + uy * uy + uz * uz);
@@ -324,9 +347,9 @@ void push_momentum(std::vector<Particles> &particles, double dt) {
       double gamma_inv = qp / gamma;
 
       // B, T = Transform to rotate the particle
-      const double tx = gamma_inv * particles[is].Bx_h_m(ip);
-      const double ty = gamma_inv * particles[is].By_h_m(ip);
-      const double tz = gamma_inv * particles[is].Bz_h_m(ip);
+      const double tx = gamma_inv * particles[is].Bx_m(ip);  //remove _h_m
+      const double ty = gamma_inv * particles[is].By_m(ip);
+      const double tz = gamma_inv * particles[is].Bz_m(ip);
       const double tsq = 1. + (tx * tx + ty * ty + tz * tz);
       double tsq_inv = 1. / tsq;
 
@@ -351,11 +374,12 @@ void push_momentum(std::vector<Particles> &particles, double dt) {
       gamma_inv = 1 / gamma;
 
       // Update momentum
-      particles[is].mx_h_m(ip) = px;
-      particles[is].my_h_m(ip) = py;
-      particles[is].mz_h_m(ip) = pz;
+      particles[is].mx_m(ip) = px; //remove _h_m
+      particles[is].my_m(ip) = py;
+      particles[is].mz_m(ip) = pz;
     } // end for particles
     );
+    Kokkos::fence("push_momentum_loop_particles"); //check
   } // end for species
 }
 
