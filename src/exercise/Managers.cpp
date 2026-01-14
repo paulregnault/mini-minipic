@@ -83,31 +83,18 @@ void iterate(const Params &params, ElectroMagn &em,
   // Projection in local field
   if (params.current_projection) {
 
-    //for (std::size_t is = 0; is < particles.size(); ++is) {
-    //  particles[is].sync(minipic::device, minipic::host);
-    //}
-
     // Projection directly in the global grid
     DEBUG("  ->  start projection");
 
     operators::project(params, em, particles);
 
     DEBUG("  ->  stop projection");
-
-    //for (std::size_t is = 0; is < particles.size(); ++is) {
-    //  particles[is].sync(minipic::device, minipic::host);
-    //}
   }
 
   // __________________________________________________________________
   // Sum all species contribution in the local and global current grids
 
   if (params.current_projection || params.n_particles > 0) {
-
-    //em.sync(minipic::host, minipic::device);
-    //for (std::size_t is = 0; is < particles.size(); ++is) {
-    //  particles[is].sync(minipic::host, minipic::device);
-    //}
 
     // Perform the boundary conditions for current
     DEBUG("  -> start current BC")
