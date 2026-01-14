@@ -785,20 +785,30 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   //   }
   // }
 
-  Kokkos::fence("maxwell"); //check
-  em.sync(minipic::device, minipic::host);
+  // Kokkos::fence("maxwell"); //check
+  // em.sync(minipic::device, minipic::host);
 
   // Electric field Ez (p,p,d)
+  Kokkos::parallel_for(
+  mdrange_policy({0, 0, 0}, {em.nx_p_m, em.ny_p_m,em.nz_d_m}),
+  KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
+    Ez_p(ix, iy, iz) += -dt * Jz_p(ix + 1, iy + 1, iz) +
+                          dt_over_dx * (By_p(ix + 1, iy, iz) - By_p(ix, iy, iz)) -
+                          dt_over_dy * (Bx_p(ix, iy + 1, iz) - Bx_p(ix, iy, iz));
+  });
 
-  for (int ix = 0; ix < em.nx_p_m; ++ix) {
-    for (int iy = 0; iy < em.ny_p_m; ++iy) {
-      for (int iz = 0; iz < em.nz_d_m; ++iz) {
-        Ez(ix, iy, iz) += -dt * em.Jz_h_m(ix + 1, iy + 1, iz) +
-                          dt_over_dx * (By(ix + 1, iy, iz) - By(ix, iy, iz)) -
-                          dt_over_dy * (Bx(ix, iy + 1, iz) - Bx(ix, iy, iz));
-      }
-    }
-  }
+  // for (int ix = 0; ix < em.nx_p_m; ++ix) {
+  //   for (int iy = 0; iy < em.ny_p_m; ++iy) {
+  //     for (int iz = 0; iz < em.nz_d_m; ++iz) {
+  //       Ez(ix, iy, iz) += -dt * em.Jz_h_m(ix + 1, iy + 1, iz) +
+  //                         dt_over_dx * (By(ix + 1, iy, iz) - By(ix, iy, iz)) -
+  //                         dt_over_dy * (Bx(ix, iy + 1, iz) - Bx(ix, iy, iz));
+  //     }
+  //   }
+  // }
+
+  Kokkos::fence("maxwell"); //check
+  em.sync(minipic::device, minipic::host);
 
   /////     Solve Maxwell Faraday (B)
 
