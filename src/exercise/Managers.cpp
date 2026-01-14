@@ -156,8 +156,13 @@ void iterate(const Params &params, ElectroMagn &em,
 
     // Solve the Maxwell equation
     DEBUG("  -> start solve Maxwell")
+    
+    em.sync(minipic::host, minipic::device);
 
     operators::solve_maxwell(params, em);
+
+    em.sync(minipic::device, minipic::host);
+
 
     DEBUG("  -> stop solve Maxwell")
 
