@@ -26,19 +26,7 @@ void initialize(const Params &params, ElectroMagn &em,
 
     operators::interpolate(em, particles);
 
-    //sync views before push_momentum
-    em.sync(minipic::host, minipic::device);
-    for (std::size_t is = 0; is < particles.size(); ++is) {
-      particles[is].sync(minipic::host, minipic::device);
-    }
-
     operators::push_momentum(particles, -0.5 * params.dt);
-
-    //sync views after push_momentum
-    // em.sync(minipic::device, minipic::host);
-    for (std::size_t is = 0; is < particles.size(); ++is) {
-      particles[is].sync(minipic::device, minipic::host);
-    }
 
     em.sync(minipic::host, minipic::device);
     for (std::size_t is = 0; is < particles.size(); ++is) {
@@ -70,22 +58,12 @@ void iterate(const Params &params, ElectroMagn &em,
 
   DEBUG("  -> stop interpolate");
 
-  em.sync(minipic::host, minipic::device);
-  for (std::size_t is = 0; is < particles.size(); ++is) {
-    particles[is].sync(minipic::host, minipic::device);
-  }
-
   // Push all particles
   DEBUG("  -> start push ");
 
   operators::push(particles, params.dt);
 
   DEBUG("  -> stop push");
-
-  em.sync(minipic::device, minipic::host);
-  for (std::size_t is = 0; is < particles.size(); ++is) {
-    particles[is].sync(minipic::device, minipic::host);
-  }
 
   // Do boundary conditions on global domain
   DEBUG("  -> Patch 0: start pushBC");
