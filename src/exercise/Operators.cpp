@@ -643,35 +643,35 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   /////     Solve Maxwell Ampere (E)
   // Electric field Ex (d,p,p)
 
-  ElectroMagn::view_t Ex = em.Ex_m;  
-  ElectroMagn::view_t Ey = em.Ey_m;  
-  ElectroMagn::view_t Ez = em.Ez_m;  
+  // ElectroMagn::view_t Ex = em.Ex_m;  
+  // ElectroMagn::view_t Ey = em.Ey_m;  
+  // ElectroMagn::view_t Ez = em.Ez_m;  
   
-  ElectroMagn::view_t Bx = em.Bx_m;  
-  ElectroMagn::view_t By = em.By_m;  
-  ElectroMagn::view_t Bz = em.Bz_m;  
+  // ElectroMagn::view_t Bx = em.Bx_m;  
+  // ElectroMagn::view_t By = em.By_m;  
+  // ElectroMagn::view_t Bz = em.Bz_m;  
 
-  ElectroMagn::view_t Jx = em.Jx_m;  
-  ElectroMagn::view_t Jy = em.Jy_m;  
-  ElectroMagn::view_t Jz = em.Jz_m;  
+  // ElectroMagn::view_t Jx = em.Jx_m;  
+  // ElectroMagn::view_t Jy = em.Jy_m;  
+  // ElectroMagn::view_t Jz = em.Jz_m;  
 
-  const auto nx_d = em.nx_d_m;
-  const auto ny_d = em.ny_d_m;
-  const auto nz_d = em.nz_d_m;
+  // const auto nx_d = em.nx_d_m;
+  // const auto ny_d = em.ny_d_m;
+  // const auto nz_d = em.nz_d_m;
 
-  const auto nx_p = em.nx_p_m;
-  const auto ny_p = em.ny_p_m;
-  const auto nz_p = em.nz_p_m;
+  // const auto nx_p = em.nx_p_m;
+  // const auto ny_p = em.ny_p_m;
+  // const auto nz_p = em.nz_p_m;
 
   
 
-  // ElectroMagn::hostview_t Ex = em.Ex_h_m;
-  // ElectroMagn::hostview_t Ey = em.Ey_h_m;
-  // ElectroMagn::hostview_t Ez = em.Ez_h_m;
+  ElectroMagn::hostview_t Ex = em.Ex_h_m;
+  ElectroMagn::hostview_t Ey = em.Ey_h_m;
+  ElectroMagn::hostview_t Ez = em.Ez_h_m;
 
-  // ElectroMagn::hostview_t Bx = em.Bx_h_m;
-  // ElectroMagn::hostview_t By = em.By_h_m;
-  // ElectroMagn::hostview_t Bz = em.Bz_h_m;
+  ElectroMagn::hostview_t Bx = em.Bx_h_m;
+  ElectroMagn::hostview_t By = em.By_h_m;
+  ElectroMagn::hostview_t Bz = em.Bz_h_m;
 
   //limit fences so that we can compute Ey if Ex finished...
 
