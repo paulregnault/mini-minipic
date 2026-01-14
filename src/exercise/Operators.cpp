@@ -382,12 +382,18 @@ void push_momentum(std::vector<Particles> &particles, double dt) {
       gamma_inv = 1 / gamma;
 
       // Update momentum
-      particles[is].mx_m(ip) = px; //remove _h_m
-      particles[is].my_m(ip) = py;
-      particles[is].mz_m(ip) = pz;
+      mx(ip) = px; //remove _h_m
+      my(ip) = py;
+      mz(ip) = pz;
     } // end for particles
     );
+    
     Kokkos::fence("push_momentum_loop_particles"); //check
+
+    particles[is].mx_m = mx; //remove _h_m
+    particles[is].my_m = my;
+    particles[is].mz_m = mz;
+
   } // end for species
 }
 
