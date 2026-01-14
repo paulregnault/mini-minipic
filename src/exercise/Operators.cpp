@@ -727,6 +727,11 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   ElectroMagn::view_t Jy_p = em.Jy_m;  
   ElectroMagn::view_t Jz_p = em.Jz_m;  
 
+
+  typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace,
+                                Kokkos::Rank<3>>
+  mdrange_policy;
+
   // Electric field Ex (d,p,p)
 
   Kokkos::parallel_for(
