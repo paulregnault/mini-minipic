@@ -743,10 +743,10 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   // Electric field Ex (d,p,p)
 
   Kokkos::parallel_for(
-    // mdrange_policy({0, 0, 0}, {em.nx_d_m, em.ny_p_m,em.nz_p_m}),
-    mdrange_policy({0, 0, 0}, {nx_d, ny_p,nz_p}),
+    mdrange_policy({0, 0, 0}, {em.nx_d_m, em.ny_p_m,em.nz_p_m}),
+    // mdrange_policy({0, 0, 0}, {nx_d, ny_p, nz_p}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
-    Ex(ix, iy, iz) += -dt * Jx_p(ix, iy + 1, iz + 1) +
+    Ex_p(ix, iy, iz) += -dt * Jx_p(ix, iy + 1, iz + 1) +
                           dt_over_dy * (Bz_p(ix, iy + 1, iz) - Bz_p(ix, iy, iz)) -
                           dt_over_dz * (By_p(ix, iy, iz + 1) - By_p(ix, iy, iz));
   });
