@@ -1214,8 +1214,8 @@ void antenna(const Params &params, ElectroMagn &em,
   const double yfs = 0.5 * params.Ly + params.inf_y;
   const double zfs = 0.5 * params.Lz + params.inf_z;
 
-  for (std::size_t iy = 0; iy < J->extent(1); ++iy) {
-	for (std::size_t iz = 0; iz < J->extent(2); ++iz) {
+  for (std::size_t iy = 0; iy < J_slice.extent(1); ++iy) {
+	for (std::size_t iz = 0; iz < J_slice.extent(2); ++iz) {
       		const double y =
       		    (iy - em.J_dual_zy_m * 0.5) * params.dy + params.inf_y - yfs;
       		const double z =
