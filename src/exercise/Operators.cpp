@@ -1205,7 +1205,7 @@ void antenna(const Params &params, ElectroMagn &em,
   const int ix = std::floor(
       (x - params.inf_x - em.J_dual_zx_m * 0.5 * params.dx) / params.dx);
 
-  auto J_slice = Kokkos::subview<LayoutLeft>(em.Jz_h_m, ix, Kokkos::ALL, Kokkos::ALL);
+  auto J_slice = Kokkos::subview<Kokkos::LayoutLeft>(em.Jz_h_m, ix, Kokkos::ALL, Kokkos::ALL);
 
   auto J_slice_d = Kokkos::subview(em.Jz_m, ix, Kokkos::ALL, Kokkos::ALL);
 
