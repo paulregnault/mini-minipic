@@ -1198,10 +1198,18 @@ void antenna(const Params &params, ElectroMagn &em,
   typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>
       mdrange_policy;
    
-  ElectroMagn::hostview_t *J = &em.Jz_h_m;
+  // ElectroMagn::hostview_t *J = &em.Jz_h_m;
+
+
 
   const int ix = std::floor(
       (x - params.inf_x - em.J_dual_zx_m * 0.5 * params.dx) / params.dx);
+
+  auto J_slice = Kokkos::subview(em.Jz_h_m, ix, Kokkos::ALL, Kokkos::ALL);
+
+  auto J_slice_d = Kokkos::subview(em.Jz_m, ix, Kokkos::ALL, Kokkos::ALL);
+
+
 
   const double yfs = 0.5 * params.Ly + params.inf_y;
   const double zfs = 0.5 * params.Lz + params.inf_z;
@@ -1213,11 +1221,15 @@ void antenna(const Params &params, ElectroMagn &em,
       		const double z =
       		    (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
 
-      		(*J)(ix, iy, iz) = profile(y, z, t);
+      		J_slice(iy, iz) = profile(y, z, t);
   	}
   }
+
+  
   //Sync back Jz
-  Kokkos::deep_copy(em.Jz_m, em.Jz_h_m);
+  Kokkos::deep_copy(J_slice_d, J_slice);
+
+  // Kokkos::deep_copy(em.Jz_m, em.Jz_h_m);
 
 } // end antenna
 
