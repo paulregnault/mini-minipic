@@ -1221,8 +1221,8 @@ void antenna(const Params &params, ElectroMagn &em,
   const double yfs = 0.5 * params.Ly + params.inf_y;
   const double zfs = 0.5 * params.Lz + params.inf_z;
 
-  for (std::size_t iy = 0; iy < J_slice.extent(1); ++iy) {
-	for (std::size_t iz = 0; iz < J_slice.extent(2); ++iz) {
+  for (std::size_t iy = 0; iy < J_slice.extent(0); ++iy) {
+	for (std::size_t iz = 0; iz < J_slice.extent(1); ++iz) {
       		const double y =
       		    (iy - em.J_dual_zy_m * 0.5) * params.dy + params.inf_y - yfs;
       		const double z =
@@ -1235,7 +1235,9 @@ void antenna(const Params &params, ElectroMagn &em,
   
   //Sync back Jz
 
-  Kokkos::View<double**, Kokkos::LayoutLeft> J_slice_left("", J_slice.extent(1),J_slice.extent(2)) ;
+  //Deprecation Error: Kokkos::deep_copy extents of views don't match: (66,1) Jz_mirror(67,66) 
+
+  Kokkos::View<double**, Kokkos::LayoutLeft> J_slice_left("", J_slice.extent(0),J_slice.extent(1)) ;
 
   Kokkos::deep_copy(J_slice_left, J_slice);
 
