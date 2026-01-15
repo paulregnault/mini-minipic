@@ -268,7 +268,7 @@ Kokkos::Profiling::pushRegion("Interpolate species loop");
     Kokkos::fence("interpolation_fence"); //check
 
   } // Species loop
-Kokkos::Profiling::popRegion("Interpolate species loop");
+Kokkos::Profiling::popRegion();
 }
 //! \brief Move the particle in the space, compute with EM fields interpolate.
 //! \param[in] particles Vector of particle species.
@@ -366,7 +366,7 @@ void push(std::vector<Particles> &particles, double dt) {
   Kokkos::fence("push_fence");
 
   } // Loop on species
-Kokkos::Profiling::popRegion("Push species loop");
+Kokkos::Profiling::popRegion();
 }
 
 //! \brief Push only the momentum.
@@ -474,7 +474,7 @@ void push_momentum(std::vector<Particles> &particles, double dt) {
     particles[is].mz_m = mz;
 
   } // end for species
-Kokkos::Profiling::popRegion("Push_momentum species loop");
+Kokkos::Profiling::popRegion();
 }
 
 //! \brief Boundaries condition on the particles, periodic
@@ -702,7 +702,7 @@ void project(const Params &params, ElectroMagn &em,
     Kokkos::fence("project fence");
 
   }   // end for each species
-Kokkos::Profiling::popRegion("Project species loop");
+Kokkos::Profiling::popRegion();
 }
 
 //! \brief Solve Maxwell equations to compute EM fields.

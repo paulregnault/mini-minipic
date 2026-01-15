@@ -54,7 +54,7 @@ void iterate(const Params &params, ElectroMagn &em,
   DEBUG("  -> Patch 0: start pushBC");
   Kokkos::Profiling::pushRegion("pushBC");
   operators::pushBC(params, particles);
-  Kokkos::Profiling::pushRegion("pushBC");
+  Kokkos::Profiling::popRegion();
   DEBUG("  -> stop pushBC");
 
 #if defined(MINI_MINIPIC_DEBUG)
@@ -85,7 +85,7 @@ void iterate(const Params &params, ElectroMagn &em,
     DEBUG("  -> start current BC")
     Kokkos::Profiling::pushRegion("currentBC");
     operators::currentBC(params, em);
-    Kokkos::Profiling::pushRegion("currentBC");
+    Kokkos::Profiling::popRegion();
     DEBUG("  -> stop current BC")
 
   } // end if current projection
@@ -113,7 +113,7 @@ void iterate(const Params &params, ElectroMagn &em,
     DEBUG("  -> start solve BC")
     Kokkos::Profiling::pushRegion("solveBC");
     operators::solveBC(params, em);
-    Kokkos::Profiling::pushRegion("solveBC");
+    Kokkos::Profiling::popRegion();
     DEBUG("  -> end solve BC")
 
   } // end test params.maxwell_solver
