@@ -52,9 +52,9 @@ void iterate(const Params &params, ElectroMagn &em,
 
   // Do boundary conditions on global domain
   DEBUG("  -> Patch 0: start pushBC");
-
+  Kokkos::Profiling::pushRegion("pushBC");
   operators::pushBC(params, particles);
-
+  Kokkos::Profiling::pushRegion("pushBC");
   DEBUG("  -> stop pushBC");
 
 #if defined(MINI_MINIPIC_DEBUG)
@@ -83,9 +83,9 @@ void iterate(const Params &params, ElectroMagn &em,
 
     // Perform the boundary conditions for current
     DEBUG("  -> start current BC")
-
+    Kokkos::Profiling::pushRegion("currentBC");
     operators::currentBC(params, em);
-
+    Kokkos::Profiling::pushRegion("currentBC");
     DEBUG("  -> stop current BC")
 
   } // end if current projection
@@ -111,9 +111,9 @@ void iterate(const Params &params, ElectroMagn &em,
 
     // Boundary conditions on EM fields
     DEBUG("  -> start solve BC")
-
+    Kokkos::Profiling::pushRegion("solveBC");
     operators::solveBC(params, em);
-
+    Kokkos::Profiling::pushRegion("solveBC");
     DEBUG("  -> end solve BC")
 
   } // end test params.maxwell_solver

@@ -84,6 +84,8 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
   const double em_inv_dy = em.inv_dy_m;
   const double em_inv_dz = em.inv_dz_m;
 
+Kokkos::Profiling::pushRegion("Interpolate species loop");
+
   for (std::size_t is = 0; is < particles.size(); is++) {
 
     const std::size_t n_particles = particles[is].size();
@@ -117,7 +119,7 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
     Particles::view_t z = particles[is].z_m;
         
     Kokkos::parallel_for(
-    "interpolation_loop",
+    "interpolation_particle_loop",
     n_particles,
     KOKKOS_LAMBDA (int part) {
     //for (std::size_t part = 0; part < n_particles; ++part) {
@@ -263,15 +265,17 @@ void interpolate(ElectroMagn &em, std::vector<Particles> &particles) {
     } // end for particles
     );
 
-    Kokkos::fence("interpolation_loop"); //check
+    Kokkos::fence("interpolation_fence"); //check
 
   } // Species loop
+Kokkos::Profiling::popRegion("Interpolate species loop");
 }
 //! \brief Move the particle in the space, compute with EM fields interpolate.
 //! \param[in] particles Vector of particle species.
 //! \param[in] dt Time step to use for the pusher.
 void push(std::vector<Particles> &particles, double dt) {
   // For each species
+  Kokkos::Profiling::pushRegion("Push species loop");
   for (std::size_t is = 0; is < particles.size(); is++) {
 
     const std::size_t n_particles = particles[is].size();
@@ -297,6 +301,7 @@ void push(std::vector<Particles> &particles, double dt) {
     Particles::view_t Bz = particles[is].Bz_m;
 
     Kokkos::parallel_for(
+	"push_particle_loop",
 	n_particles, 
 	KOKKOS_LAMBDA(const int ip){
 
@@ -358,9 +363,10 @@ void push(std::vector<Particles> &particles, double dt) {
     	} //End loop on particles
   );
 
-  Kokkos::fence();
+  Kokkos::fence("push_fence");
 
   } // Loop on species
+Kokkos::Profiling::popRegion("Push species loop");
 }
 
 //! \brief Push only the momentum.
@@ -370,6 +376,7 @@ void push(std::vector<Particles> &particles, double dt) {
 void push_momentum(std::vector<Particles> &particles, double dt) {
   // for each species
   //not priority to parallelise since small number of species
+  Kokkos::Profiling::pushRegion("Push_momentum species loop");
   for (std::size_t is = 0; is < particles.size(); is++) {
 
     const std::size_t n_particles = particles[is].size();
@@ -467,6 +474,7 @@ void push_momentum(std::vector<Particles> &particles, double dt) {
     particles[is].mz_m = mz;
 
   } // end for species
+Kokkos::Profiling::popRegion("Push_momentum species loop");
 }
 
 //! \brief Boundaries condition on the particles, periodic
@@ -480,7 +488,7 @@ void pushBC(const Params &params, std::vector<Particles> &particles) {
   // Periodic conditions
   if (params.boundary_condition_code == 1) {
     const double length[3] = {params.Lx, params.Ly, params.Lz};
-
+    
     for (std::size_t is = 0; is < particles.size(); is++) {
       std::size_t n_particles = particles[is].size();
 
@@ -549,6 +557,7 @@ void pushBC(const Params &params, std::vector<Particles> &particles) {
 //! \param[in] particles Vector of species particles.
 void project(const Params &params, ElectroMagn &em,
              std::vector<Particles> &particles) {
+  Kokkos::Profiling::pushRegion("Project species loop");
   for (std::size_t is = 0; is < particles.size(); is++) {
 
     const std::size_t n_particles = particles[is].size();
@@ -575,6 +584,7 @@ void project(const Params &params, ElectroMagn &em,
     Kokkos::View<double ***, Kokkos::MemoryTraits<Kokkos::Atomic> > Jz = em.Jz_m;
 
     Kokkos::parallel_for (
+	"project_particle_loop",
 	n_particles, 
 	KOKKOS_LAMBDA(const int ip) {
                 double *pos[3] = {&x(ip), &y(ip), &z(ip)};
@@ -689,9 +699,10 @@ void project(const Params &params, ElectroMagn &em,
     	}// end for each particles
     );
 
-    Kokkos::fence();
+    Kokkos::fence("project fence");
 
   }   // end for each species
+Kokkos::Profiling::popRegion("Project species loop");
 }
 
 //! \brief Solve Maxwell equations to compute EM fields.
@@ -726,6 +737,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   // Electric field Ex (d,p,p)
 
   Kokkos::parallel_for(
+    "Ex parallel loop",
     mdrange_policy({0, 0, 0}, {em.nx_d_m, em.ny_p_m,em.nz_p_m}),
     // mdrange_policy({0, 0, 0}, {nx_d, ny_p, nz_p}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
@@ -751,6 +763,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
 
   // Electric field Ey (p,d,p)
   Kokkos::parallel_for(
+  "Ey parallel loop",
   mdrange_policy({0, 0, 0}, {em.nx_p_m, em.ny_d_m,em.nz_p_m}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
    Ey(ix, iy, iz) += -dt * Jy(ix + 1, iy, iz + 1) -
@@ -773,6 +786,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
 
   // Electric field Ez (p,p,d)
   Kokkos::parallel_for(
+  "Ez parallel loop",
   mdrange_policy({0, 0, 0}, {em.nx_p_m, em.ny_p_m,em.nz_d_m}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
     Ez(ix, iy, iz) += -dt * Jz(ix + 1, iy + 1, iz) +
@@ -790,7 +804,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   //   }
   // }
 
-  Kokkos::fence("maxwell"); //check
+  Kokkos::fence("Maxwell fence 1"); //check
   // em.sync(minipic::device, minipic::host);
 
   /////     Solve Maxwell Faraday (B)
@@ -798,6 +812,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   // Magnetic field Bx (p,d,d)
   
   Kokkos::parallel_for(
+  "Bx parallel loop",
   mdrange_policy({0, 1, 1}, {em.nx_p_m, em.ny_d_m-1, em.nz_d_m-1}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
     Bx(ix, iy, iz) += -dt_over_dy * (Ez(ix, iy, iz) - Ez(ix, iy - 1, iz)) +
@@ -815,6 +830,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
 
   // Magnetic field By (d,p,d)
   Kokkos::parallel_for(
+  "By parallel loop",
   mdrange_policy({1, 0, 1}, {em.nx_d_m-1, em.ny_p_m,em.nz_d_m-1}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
    By(ix, iy, iz) += -dt_over_dz * (Ex(ix, iy, iz) - Ex(ix, iy, iz - 1)) +
@@ -833,6 +849,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   // Magnetic field Bz (d,d,p)
 
   Kokkos::parallel_for(
+  "Bz parallel loop",
   mdrange_policy({1, 1, 0}, {em.nx_d_m-1, em.ny_d_m-1,em.nz_p_m}),
   KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
     Bz(ix, iy, iz) += -dt_over_dx * (Ey(ix, iy, iz) - Ey(ix - 1, iy, iz)) +
@@ -848,7 +865,7 @@ void solve_maxwell(const Params &params, ElectroMagn &em) {
   //   }
   // }
 
-  Kokkos::fence("maxwell2"); //check
+  Kokkos::fence("Maxwell fence 2"); //check
 
 
 } // end solve
@@ -1223,6 +1240,7 @@ void antenna(const Params &params, ElectroMagn &em,
   const double inf_z = params.inf_z;
 
   Kokkos::parallel_for (
+	"antenna parallel loop",
 	mdrange_policy({0,0}, {J.extent(1),J.extent(2)}),
 	KOKKOS_LAMBDA(std::size_t iy, std::size_t iz){
       		const double y =
@@ -1240,7 +1258,7 @@ void antenna(const Params &params, ElectroMagn &em,
   	}
   );
 
-  Kokkos::fence();
+  Kokkos::fence("Antenna fence");
 } // end antenna
 
 } // end namespace operators
