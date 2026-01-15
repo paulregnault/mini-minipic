@@ -1250,8 +1250,8 @@ void antenna(const Params &params, ElectroMagn &em,
   bool is_contiguous = J_slice_left.span_is_contiguous();
   std::cout << "Is x_slice contiguous? " << is_contiguous << std::endl;
 
-  bool is_contiguous = J_slice_d.span_is_contiguous();
-  std::cout << "Is x_slice contiguous? " << is_contiguous << std::endl;
+  bool is_contiguous2 = J_slice_d.span_is_contiguous();
+  std::cout << "Is x_slice contiguous? " << is_contiguous2 << std::endl;
 
   Kokkos::deep_copy(J_slice_d, J_slice_left);
 
