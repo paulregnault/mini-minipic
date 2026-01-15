@@ -1235,7 +1235,7 @@ void antenna(const Params &params, ElectroMagn &em,
   
   //Sync back Jz
 
-  Kokkos::View<double**, Kokkos::LayoutLeft> J_slice_left ;
+  Kokkos::View<double**, Kokkos::LayoutLeft> J_slice_left[J_slice.extent(1),J_slice.extent(2)] ;
 
   Kokkos::deep_copy(J_slice_left, J_slice);
 
