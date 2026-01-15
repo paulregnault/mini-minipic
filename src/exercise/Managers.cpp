@@ -71,7 +71,13 @@ void iterate(const Params &params, ElectroMagn &em,
     // Projection directly in the global grid
     DEBUG("  ->  start projection");
 
+    Kokkos::Profiling::pushRegion(
+    "project"
+    );
+
     operators::project(params, em, particles);
+
+    Kokkos::Profiling::popRegion();
 
     DEBUG("  ->  stop projection");
   }
