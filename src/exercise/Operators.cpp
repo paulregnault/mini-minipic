@@ -1237,11 +1237,23 @@ void antenna(const Params &params, ElectroMagn &em,
 
   //Deprecation Error: Kokkos::deep_copy extents of views don't match: (66,1) Jz_mirror(67,66) 
 
-  Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> J_slice_left("", J_slice.extent(0),J_slice.extent(1)) ;
+  Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> J_slice_left("J_slice_left", J_slice.extent(0),J_slice.extent(1)) ;
+
+  std::cout << " > before deep copy "
+          << "\n"
+          << std::endl;
 
   Kokkos::deep_copy(J_slice_left, J_slice);
 
+  std::cout << " > After Kokkos::deep_copy(J_slice_left, J_slice); "
+          << "\n"
+          << std::endl;
+
   Kokkos::deep_copy(J_slice_d, J_slice_left);
+
+  std::cout << " > deep copy 2 "
+          << "\n"
+          << std::endl;
 
   // Kokkos::deep_copy(em.Jz_m, em.Jz_h_m);
 
