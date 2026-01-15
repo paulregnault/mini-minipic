@@ -1205,11 +1205,13 @@ void antenna(const Params &params, ElectroMagn &em,
   const int ix = std::floor(
       (x - params.inf_x - em.J_dual_zx_m * 0.5 * params.dx) / params.dx);
 
-  Kokkos::View<double**, Kokkos::LayoutLeft> J_slice ;
   
-  J_slice = Kokkos::subview(em.Jz_h_m, ix, Kokkos::ALL, Kokkos::ALL);
+  
+  // J_slice = Kokkos::subview(em.Jz_h_m, ix, Kokkos::ALL, Kokkos::ALL);
 
-  // auto J_slice = Kokkos::subview(em.Jz_h_m, ix, Kokkos::ALL, Kokkos::ALL);
+
+
+  auto J_slice = Kokkos::subview(em.Jz_h_m, ix, Kokkos::ALL, Kokkos::ALL);
 
   auto J_slice_d = Kokkos::subview(em.Jz_m, ix, Kokkos::ALL, Kokkos::ALL);
 
@@ -1232,7 +1234,12 @@ void antenna(const Params &params, ElectroMagn &em,
 
   
   //Sync back Jz
-  Kokkos::deep_copy(J_slice_d, J_slice);
+
+  Kokkos::View<double**, Kokkos::LayoutLeft> J_slice_left ;
+
+  Kokkos::deep_copy(J_slice_left, J_slice);
+
+  Kokkos::deep_copy(J_slice_d, J_slice_left);
 
   // Kokkos::deep_copy(em.Jz_m, em.Jz_h_m);
 
