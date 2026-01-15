@@ -1221,6 +1221,10 @@ void antenna(const Params &params, ElectroMagn &em,
   const double yfs = 0.5 * params.Ly + params.inf_y;
   const double zfs = 0.5 * params.Lz + params.inf_z;
 
+  // Create a contiguous temporary view on the device
+  Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::CudaSpace>
+    J_slice_d_contig("J_slice_d_contig", J_slice.extent(0), J_slice.extent(1));
+
   auto J_slice_d_contig_host = Kokkos::create_mirror_view(J_slice_d_contig);
 
 
@@ -1266,9 +1270,7 @@ void antenna(const Params &params, ElectroMagn &em,
   //         << std::endl;
 
 
-    // Create a contiguous temporary view on the device
-    Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::CudaSpace>
-        J_slice_d_contig("J_slice_d_contig", J_slice.extent(0), J_slice.extent(1));
+
 
     // Copy data from host slice to device contiguous view
     // Kokkos::deep_copy(J_slice_d_contig_host, J_slice);
