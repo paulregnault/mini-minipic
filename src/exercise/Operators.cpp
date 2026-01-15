@@ -358,7 +358,7 @@ void push(std::vector<Particles> &particles, double dt) {
     	} //End loop on particles
   );
 
-  Kokkos::fence();
+  Kokkos::fence("push");
 
   } // Loop on species
 }
@@ -502,7 +502,7 @@ void pushBC(const Params &params, std::vector<Particles> &particles) {
           } // End loop on particles
       );
 
-      Kokkos::fence();
+      Kokkos::fence("pushBC");
 
     } // End loop on species
 
@@ -537,7 +537,7 @@ void pushBC(const Params &params, std::vector<Particles> &particles) {
           } // End loop on particles
       );
 
-      Kokkos::fence();
+      Kokkos::fence("pushBC2");
 
     } // End loop on species
   }   // if type of conditions
@@ -689,7 +689,7 @@ void project(const Params &params, ElectroMagn &em,
     	}// end for each particles
     );
 
-    Kokkos::fence();
+    Kokkos::fence("project");
 
   }   // end for each species
 }
@@ -912,7 +912,7 @@ void currentBC(const Params &params, ElectroMagn &em) {
           Jz(nx_Jz - 1, iy, iz) = Jz(1, iy, iz);
         });
 
-    Kokkos::fence();
+    Kokkos::fence("currentBC");
 
     // Y
 
@@ -946,7 +946,7 @@ void currentBC(const Params &params, ElectroMagn &em) {
           Jz(ix, ny_Jz - 1, iz) = Jz(ix, 1, iz);
         });
 
-    Kokkos::fence();
+    Kokkos::fence("currentBC2");
 
     // Z
 
@@ -980,7 +980,7 @@ void currentBC(const Params &params, ElectroMagn &em) {
           Jz(ix, iy, nz_Jz - 1) = Jz(ix, iy, 1);
         });
 
-    Kokkos::fence();
+    Kokkos::fence("currentBC3");
 
   } // end if periodic
 } // end currentBC
@@ -1030,7 +1030,7 @@ void solveBC(const Params &params, ElectroMagn &em) {
           Bz(nx_Bz - 1, iy, iz) = Bz(1, iy, iz);
         });
 
-    Kokkos::fence();
+    Kokkos::fence("solveBC");
 
     // Y dim
     // Bx (p,d,d)
@@ -1055,7 +1055,7 @@ void solveBC(const Params &params, ElectroMagn &em) {
           Bz(ix, ny_Bz - 1, iz) = Bz(ix, 1, iz);
         });
 
-    Kokkos::fence();
+    Kokkos::fence("solveBC2");
 
     // Z dim
     // Bx
@@ -1079,7 +1079,7 @@ void solveBC(const Params &params, ElectroMagn &em) {
           By(ix, iy, nz_By - 1) = By(ix, iy, 1);
         });
 
-    Kokkos::fence();
+    Kokkos::fence("solveBC3");
 
   } else if (params.boundary_condition == "reflective") {
 
@@ -1131,7 +1131,7 @@ void solveBC(const Params &params, ElectroMagn &em) {
           Bx(ix, ny_Bx - 1, iz) = Bx(ix, ny_Bx - 2, iz);
         });
 
-    Kokkos::fence();
+    Kokkos::fence("solveBC4");
 
     // Bz (-1 to avoid corner)
     Kokkos::parallel_for(
@@ -1164,7 +1164,7 @@ void solveBC(const Params &params, ElectroMagn &em) {
           By(ix, iy, nz_By - 1) = By(ix, iy, nz_By - 2);
         });
 
-    Kokkos::fence();
+    Kokkos::fence("solveBC5");
   } // End if
 } // End solveBC
 
@@ -1240,7 +1240,7 @@ void antenna(const Params &params, ElectroMagn &em,
   	}
   );
 
-  Kokkos::fence();
+  Kokkos::fence("antenna");
 } // end antenna
 
 } // end namespace operators
