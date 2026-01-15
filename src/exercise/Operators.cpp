@@ -1233,31 +1233,50 @@ void antenna(const Params &params, ElectroMagn &em,
   }
 
   
-  //Sync back Jz
+  // //Sync back Jz
 
-  Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> J_slice_left("J_slice_left", J_slice.extent(0),J_slice.extent(1)) ;
+  // Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> J_slice_left("J_slice_left", J_slice.extent(0),J_slice.extent(1)) ;
 
-  std::cout << " > before deep copy "
-          << "\n"
-          << std::endl;
+  // std::cout << " > before deep copy "
+  //         << "\n"
+  //         << std::endl;
 
-  Kokkos::deep_copy(J_slice_left, J_slice);
+  // Kokkos::deep_copy(J_slice_left, J_slice);
 
-  std::cout << " > After Kokkos::deep_copy(J_slice_left, J_slice); "
-          << "\n"
-          << std::endl;
+  // std::cout << " > After Kokkos::deep_copy(J_slice_left, J_slice); "
+  //         << "\n"
+  //         << std::endl;
 
-  bool is_contiguous = J_slice_left.span_is_contiguous();
-  std::cout << "Is x_slice contiguous? " << is_contiguous << std::endl;
+  // bool is_contiguous = J_slice_left.span_is_contiguous();
+  // std::cout << "Is x_slice contiguous? " << is_contiguous << std::endl;
 
-  bool is_contiguous2 = J_slice_d.span_is_contiguous();
-  std::cout << "Is x_slice contiguous? " << is_contiguous2 << std::endl;
+  // bool is_contiguous2 = J_slice_d.span_is_contiguous(); //result : not contiguous
+  // std::cout << "Is x_slice contiguous? " << is_contiguous2 << std::endl;
 
-  Kokkos::deep_copy(J_slice_d, J_slice_left);
+  // Kokkos::deep_copy(J_slice_d, J_slice_left);
 
-  std::cout << " > deep copy 2 "
-          << "\n"
-          << std::endl;
+  // std::cout << " > deep copy 2 "
+  //         << "\n"
+  //         << std::endl;
+
+
+    // Create a contiguous temporary view on the device
+    Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::CudaSpace>
+        J_slice_d_contig("J_slice_d_contig", J_slice.extent(0), J_slice.extent(1));
+
+    // Copy data from host slice to device contiguous view
+    auto J_slice_d_contig_host = Kokkos::create_mirror_view(J_slice_d_contig);
+    Kokkos::deep_copy(J_slice_d_contig_host, J_slice);
+
+    Kokkos::deep_copy(J_slice_d_contig, J_slice_d_contig_host);
+
+    // Copy from contiguous view to non-contiguous device slice
+    Kokkos::parallel_for("copy_to_slice",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {J_slice_d.extent(0), J_slice_d.extent(1)}),
+        KOKKOS_LAMBDA(int iy, int iz) {
+            J_slice_d(iy, iz) = J_slice_d_contig(iy, iz);
+        });
+
 
   // Kokkos::deep_copy(em.Jz_m, em.Jz_h_m);
 
