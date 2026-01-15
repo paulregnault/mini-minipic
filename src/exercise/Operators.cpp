@@ -1199,6 +1199,8 @@ void antenna(const Params &params, ElectroMagn &em,
       mdrange_policy;
    
   ElectroMagn::hostview_t *J = &em.Jz_h_m;
+  Kokkos::View<double**, LayoutLeft, Host> h_buffer("host_buffer",J->extent(1),J->extent(2));
+  auto d_buffer = Kokkos::create_mirror_view(h_buffer);
 
   const int ix = std::floor(
       (x - params.inf_x - em.J_dual_zx_m * 0.5 * params.dx) / params.dx);
@@ -1214,10 +1216,18 @@ void antenna(const Params &params, ElectroMagn &em,
       		    (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
 
       		(*J)(ix, iy, iz) = profile(y, z, t);
+		h_buffer(iy, iz) = (*J)(ix, iy, iz);
   	}
   }
   //Sync back Jz
-  Kokkos::deep_copy(em.Jz_m, em.Jz_h_m);
+  Kokkos::deep_copy(d_buffer, h_buffer);
+
+  Kokkos::parallel_for(
+	mdrange_policy({0, 0}, {J->extent(1), J->extent(2)}),
+        KOKKOS_LAMBDA(std::size_t iy, std::size_t iz) {
+		em.Jz_m(ix, iy, iz) = d_buffer(iy, iz);
+	}
+  );
 
 } // end antenna
 
