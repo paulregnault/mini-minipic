@@ -1197,7 +1197,8 @@ void antenna(const Params &params, ElectroMagn &em,
              double t) {
   typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>
       mdrange_policy;
-  
+  //Only sync Jz 
+  Kokkos::deep_copy(em.Jz_h_m, em.Jz_m); 
   ElectroMagn::hostview_t *J = &em.Jz_h_m;
 
   const int ix = std::floor(
@@ -1209,16 +1210,16 @@ void antenna(const Params &params, ElectroMagn &em,
   for (std::size_t iy = 0; iy < J->extent(1); ++iy) {
 	for (std::size_t iz = 0; iz < J->extent(2); ++iz) {
       		const double y =
-      		    (iy - J_d_zy * 0.5) * dy + inf_y - yfs;
+      		    (iy - em.J_dual_zy_m * 0.5) * params.dy + params.inf_y - yfs;
       		const double z =
-      		    (iz - J_d_zz * 0.5) * dz + inf_z - zfs;
-		const double focal_spot = 
-		    std::exp(-(y * y + z * z) / (waist_focal_spot_square));
+      		    (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
 
-		// Derivative of a E field of the form E0 * exp(-alpha * t^2) * cos(beta * t)
       		(*J)(ix, iy, iz) = profile(y, z, t);
   	}
   }
+  //Sync back Jz
+  Kokkos::deep_copy(em.Jz_m, em.Jz_h_m);
+
 } // end antenna
 
 } // end namespace operators
