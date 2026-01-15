@@ -1197,8 +1197,7 @@ void antenna(const Params &params, ElectroMagn &em,
              double t) {
   typedef Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>
       mdrange_policy;
-  //Only sync Jz 
-  Kokkos::deep_copy(em.Jz_h_m, em.Jz_m); 
+   
   ElectroMagn::hostview_t *J = &em.Jz_h_m;
 
   const int ix = std::floor(
