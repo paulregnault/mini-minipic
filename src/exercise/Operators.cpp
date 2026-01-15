@@ -1235,8 +1235,6 @@ void antenna(const Params &params, ElectroMagn &em,
   
   //Sync back Jz
 
-  //Deprecation Error: Kokkos::deep_copy extents of views don't match: (66,1) Jz_mirror(67,66) 
-
   Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> J_slice_left("J_slice_left", J_slice.extent(0),J_slice.extent(1)) ;
 
   std::cout << " > before deep copy "
@@ -1250,6 +1248,9 @@ void antenna(const Params &params, ElectroMagn &em,
           << std::endl;
 
   bool is_contiguous = J_slice_left.span_is_contiguous();
+  std::cout << "Is x_slice contiguous? " << is_contiguous << std::endl;
+
+  bool is_contiguous = J_slice_d.span_is_contiguous();
   std::cout << "Is x_slice contiguous? " << is_contiguous << std::endl;
 
   Kokkos::deep_copy(J_slice_d, J_slice_left);
