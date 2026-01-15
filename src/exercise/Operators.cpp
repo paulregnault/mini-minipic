@@ -1221,6 +1221,9 @@ void antenna(const Params &params, ElectroMagn &em,
   const double yfs = 0.5 * params.Ly + params.inf_y;
   const double zfs = 0.5 * params.Lz + params.inf_z;
 
+  auto J_slice_d_contig_host = Kokkos::create_mirror_view(J_slice_d_contig);
+
+
   for (std::size_t iy = 0; iy < J_slice.extent(0); ++iy) {
 	for (std::size_t iz = 0; iz < J_slice.extent(1); ++iz) {
       		const double y =
@@ -1228,7 +1231,10 @@ void antenna(const Params &params, ElectroMagn &em,
       		const double z =
       		    (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
 
-      		J_slice(iy, iz) = profile(y, z, t);
+      		// J_slice(iy, iz) = profile(y, z, t);
+          double value = profile(y, z, t);
+          J_slice(iy, iz) = value;
+          J_slice_d_contig_host(iy, iz) = value;
   	}
   }
 
@@ -1265,8 +1271,7 @@ void antenna(const Params &params, ElectroMagn &em,
         J_slice_d_contig("J_slice_d_contig", J_slice.extent(0), J_slice.extent(1));
 
     // Copy data from host slice to device contiguous view
-    auto J_slice_d_contig_host = Kokkos::create_mirror_view(J_slice_d_contig);
-    Kokkos::deep_copy(J_slice_d_contig_host, J_slice);
+    // Kokkos::deep_copy(J_slice_d_contig_host, J_slice);
 
     Kokkos::deep_copy(J_slice_d_contig, J_slice_d_contig_host);
 
