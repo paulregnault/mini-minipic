@@ -1215,8 +1215,9 @@ void antenna(const Params &params, ElectroMagn &em,
       		const double z =
       		    (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
 
-      		(*J)(ix, iy, iz) = profile(y, z, t);
-		h_buffer(iy, iz) = (*J)(ix, iy, iz);
+                double value = profile(y,z,t);
+      		(*J)(ix, iy, iz) = value;
+		h_buffer(iy, iz) = value;
   	}
   }
   //Sync back Jz
