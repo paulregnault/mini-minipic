@@ -1246,7 +1246,7 @@ void antenna(const Params &params, ElectroMagn &em,
           J_slice_d_contig_host(iy, iz) = value;
   }
 
-  )
+  );
 
 
   // Kokkos::parallel_for(
