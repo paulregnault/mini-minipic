@@ -1199,8 +1199,8 @@ void antenna(const Params &params, ElectroMagn &em,
       mdrange_policy;
    
   ElectroMagn::hostview_t *J = &em.Jz_h_m;
-  Kokkos::View<double**, LayoutLeft, Host> h_buffer("host_buffer",J->extent(1),J->extent(2));
-  auto d_buffer = Kokkos::create_mirror_view(h_buffer);
+  Kokkos::View<double**> d_buffer("device_buffer",J->extent(1),J->extent(2));
+  auto h_buffer = Kokkos::create_mirror_view(d_buffer);
 
   const int ix = std::floor(
       (x - params.inf_x - em.J_dual_zx_m * 0.5 * params.dx) / params.dx);
