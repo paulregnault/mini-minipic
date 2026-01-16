@@ -1233,7 +1233,7 @@ void antenna(const Params &params, ElectroMagn &em,
 
   Kokkos::parallel_for (
   "antenna",
-	Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>({0,0}, {J.extent(1),J.extent(2)}),
+	Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>({0,0}, {J_slice.extent(0),J_slice.extent(1)}),
 	KOKKOS_LAMBDA(std::size_t iy, std::size_t iz){
     const double y =
       		    (iy - em.J_dual_zy_m * 0.5) * params.dy + params.inf_y - yfs;
