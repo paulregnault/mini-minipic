@@ -17,7 +17,9 @@
 class ElectroMagn {
 public:
   using view_t = Kokkos::View<double ***>;
+  using bview_t = Kokkos::View<double**>;
   using hostview_t = typename view_t::host_mirror_type;
+  using hostbview_t = typename bview_t::host_mirror_type;
 
   ElectroMagn() {}
 
@@ -56,6 +58,9 @@ public:
   hostview_t Jy_h_m;
   view_t Jz_m;
   hostview_t Jz_h_m;
+
+  bview_t Jz_d_buffer;
+  hostbview_t Jz_h_buffer;
 
   // Required by the Antenna operator.
   int J_dual_zx_m;
@@ -105,6 +110,9 @@ public:
     Jz_m = view_t("Jz", nx_p_m + 2, ny_p_m + 2, nz_d_m);
     Jz_h_m = Kokkos::create_mirror_view(Jz_m);
     Kokkos::deep_copy(Jz_h_m, 0.0);
+
+    Jz_d_buffer = bview_t("Jz_d_buffer", ny_p_m + 2, nz_d_m);
+    Jz_h_buffer = Kokkos::create_mirror_view(Jz_d_buffer);
 
     J_dual_zx_m = 0;
     J_dual_zy_m = 0;
