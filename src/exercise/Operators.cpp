@@ -1221,6 +1221,8 @@ void antenna(const Params &params, ElectroMagn &em,
   const double yfs = 0.5 * params.Ly + params.inf_y;
   const double zfs = 0.5 * params.Lz + params.inf_z;
 
+  //TODO allocate only once 
+  
   // Create a contiguous temporary view on the device
   Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::CudaSpace>
     J_slice_d_contig("J_slice_d_contig", J_slice.extent(0), J_slice.extent(1));
@@ -1228,9 +1230,12 @@ void antenna(const Params &params, ElectroMagn &em,
   auto J_slice_d_contig_host = Kokkos::create_mirror_view(J_slice_d_contig);
 
 
-  for (std::size_t iy = 0; iy < J_slice.extent(0); ++iy) {
-	for (std::size_t iz = 0; iz < J_slice.extent(1); ++iz) {
-      		const double y =
+
+  Kokkos::parallel_for (
+  "antenna",
+	Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>({0,0}, {J.extent(1),J.extent(2)}),
+	KOKKOS_LAMBDA(std::size_t iy, std::size_t iz){
+    const double y =
       		    (iy - em.J_dual_zy_m * 0.5) * params.dy + params.inf_y - yfs;
       		const double z =
       		    (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
@@ -1239,8 +1244,31 @@ void antenna(const Params &params, ElectroMagn &em,
           double value = profile(y, z, t);
           J_slice(iy, iz) = value;
           J_slice_d_contig_host(iy, iz) = value;
-  	}
   }
+
+  )
+
+
+  // Kokkos::parallel_for(
+  // "antenna",
+  // mdrange_policy({0, 0, 0}, {em.nx_p_m, em.ny_d_m,em.nz_p_m}),
+  // KOKKOS_LAMBDA(const int ix, const int iy, const int iz) {
+
+
+
+  // for (std::size_t iy = 0; iy < J_slice.extent(0); ++iy) {
+	// for (std::size_t iz = 0; iz < J_slice.extent(1); ++iz) {
+  //     		const double y =
+  //     		    (iy - em.J_dual_zy_m * 0.5) * params.dy + params.inf_y - yfs;
+  //     		const double z =
+  //     		    (iz - em.J_dual_zz_m * 0.5) * params.dz + params.inf_z - zfs;
+
+  //     		// J_slice(iy, iz) = profile(y, z, t);
+  //         double value = profile(y, z, t);
+  //         J_slice(iy, iz) = value;
+  //         J_slice_d_contig_host(iy, iz) = value;
+  // 	}
+  // }
 
   
   // //Sync back Jz
